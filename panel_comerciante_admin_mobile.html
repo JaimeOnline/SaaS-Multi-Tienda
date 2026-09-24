@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panel de Administración - TuBase Express</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        /* Hide scrollbars for clean mobile feel */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 flex justify-center selection:bg-brand-500 selection:text-white" x-data="adminApp()">
+
+    <!-- Main Mobile Container Simulator / Standalone Screen -->
+    <div class="w-full max-w-md bg-slate-50 min-h-screen shadow-2xl relative flex flex-col border-x border-slate-200/80 pb-24">
+
+        <!-- Top Header & Store Bar -->
+        <header class="bg-slate-900 text-white px-4 pt-4 pb-3 sticky top-0 z-30 shadow-md">
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center font-bold text-lg text-white shadow-sm ring-2 ring-brand-400/30">
+                        <span x-text="store.name ? store.name.substring(0,2).toUpperCase() : 'MA'">MA</span>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h1 class="font-bold text-base leading-tight truncate" x-text="store.name">Postres Doña María</h1>
+                        <a :href="'https://' + store.subdomain + '.tubase.com'" target="_blank" class="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-mono">
+                            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span x-text="store.subdomain + '.tubase.com'">postresmari.tubase.com</span>
+                            <i data-lucide="external-link" class="w-3 h-3 ml-0.5"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Action Button: Open Preview -->
+                <button @click="openStorePreview = true" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 p-2.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition active:scale-95">
+                    <i data-lucide="eye" class="w-4 h-4 text-emerald-400"></i>
+                    <span class="hidden sm:inline">Ver Tienda</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Content Body (Tab Dependent) -->
+        <main class="flex-1 p-4 space-y-4">
+
+            <!-- TAB 1: PRODUCTOS -->
+            <section x-show="activeTab === 'products'" class="space-y-4">
+                
+                <!-- Search & Filter Bar -->
+                <div class="space-y-2">
+                    <div class="relative">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+                        <input type="text" x-model="searchQuery" placeholder="Buscar producto por nombre..." 
+                            class="w-full bg-white border border-slate-200 pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition shadow-sm">
+                        <button x-show="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600">
+                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <!-- Horizontal Category Filter Chips -->
+                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                        <button @click="selectedCategory = 'all'" 
+                            :class="selectedCategory === 'all' ? 'bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'"
+                            class="px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition active:scale-95">
+                            Todos (<span x-text="products.length">0</span>)
+                        </button>
+                        <template x-for="cat in categories" :key="cat.id">
+                            <button @click="selectedCategory = cat.id" 
+                                :class="selectedCategory === cat.id ? 'bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'"
+                                class="px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition active:scale-95">
+                                <span x-text="cat.name"></span>
+                                (<span x-text="products.filter(p => p.categoryId === cat.id).length"></span>)
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Product List Cards -->
+                <div class="space-y-2.5">
+                    <template x-for="product in filteredProducts" :key="product.id">
+                        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between gap-3 hover:border-slate-300 transition">
+                            <!-- Image Thumbnail -->
+                            <img :src="product.image || 'https://placehold.co/120x120/f1f5f9/94a3b8?text=Foto'" 
+                                 :alt="product.name" 
+                                 class="w-16 h-16 rounded-xl object-cover border border-slate-100 flex-shrink-0 bg-slate-100">
+                            
+                            <!-- Product Details -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-1.5 mb-0.5">
+                                    <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded"
+                                          x-text="getCategoryName(product.categoryId)">Categoría</span>
+                                </div>
+                                <h3 class="font-semibold text-slate-800 text-sm truncate leading-snug" x-text="product.name"></h3>
+                                <p class="text-brand-600 font-bold text-base" x-text="store.currency + ' ' + parseFloat(product.price).toFixed(2)"></p>
+                            </div>
+
+                            <!-- Actions & Availability Switch (Quick Toggle) -->
+                            <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                                <!-- Quick Availability Toggle -->
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" :checked="product.isAvailable" @change="toggleAvailability(product)">
+                                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                </label>
+                                <span class="text-[10px] font-medium" :class="product.isAvailable ? 'text-emerald-600' : 'text-slate-400'" x-text="product.isAvailable ? 'Disponible' : 'Agotado'"></span>
+
+                                <!-- Edit & Delete buttons -->
+                                <div class="flex items-center gap-1">
+                                    <button @click="openEditProduct(product)" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100">
+                                        <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    <button @click="deleteProduct(product.id)" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Empty State -->
+                    <div x-show="filteredProducts.length === 0" class="bg-white p-8 rounded-2xl border border-dashed border-slate-200 text-center space-y-2">
+                        <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
+                            <i data-lucide="package-x" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-slate-600 font-medium text-sm">No se encontraron productos</p>
+                        <p class="text-xs text-slate-400">Intenta cambiar el filtro o agrega un nuevo producto con el botón verde.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: CATEGORÍAS -->
+            <section x-show="activeTab === 'categories'" class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-base">Categorías del Negocio</h2>
+                        <p class="text-xs text-slate-500">Organiza tus productos para la vista de tus clientes.</p>
+                    </div>
+                    <button @click="openCategoryModal()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1 transition active:scale-95">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Nueva</span>
+                    </button>
+                </div>
+
+                <div class="space-y-2">
+                    <template x-for="(cat, index) in categories" :key="cat.id">
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-sm flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-3">
+                                <div class="cursor-grab text-slate-300 hover:text-slate-500">
+                                    <i data-lucide="grip-vertical" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-slate-800 text-sm" x-text="cat.name"></h4>
+                                    <span class="text-xs text-slate-400" x-text="products.filter(p => p.categoryId === cat.id).length + ' productos asociados'"></span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-1">
+                                <button @click="editCategory(cat)" class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100">
+                                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                                </button>
+                                <button @click="deleteCategory(cat.id)" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </section>
+
+            <!-- TAB 3: PEDIDOS -->
+            <section x-show="activeTab === 'orders'" class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-base">Historial de Pedidos</h2>
+                        <p class="text-xs text-slate-500">Pedidos armados por clientes que hicieron clic a WhatsApp.</p>
+                    </div>
+                    <span class="bg-emerald-100 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-full" x-text="orders.length + ' Total'"></span>
+                </div>
+
+                <div class="space-y-3">
+                    <template x-for="order in orders" :key="order.id">
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                            <div class="flex items-start justify-between border-b border-slate-100 pb-2.5">
+                                <div>
+                                    <span class="text-xs font-mono text-slate-400" x-text="'#' + order.id"></span>
+                                    <h4 class="font-bold text-slate-800 text-sm" x-text="order.customerName"></h4>
+                                    <p class="text-xs text-slate-500" x-text="order.date"></p>
+                                </div>
+                                <span :class="{
+                                    'bg-amber-50 text-amber-600 border-amber-200': order.status === 'Pendiente',
+                                    'bg-emerald-50 text-emerald-600 border-emerald-200': order.status === 'Entregado',
+                                    'bg-slate-100 text-slate-600 border-slate-200': order.status === 'Atendido'
+                                }" class="px-2.5 py-0.5 text-[11px] font-semibold rounded-full border" x-text="order.status"></span>
+                            </div>
+
+                            <!-- Order Items -->
+                            <div class="space-y-1 text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <template x-for="item in order.items" :key="item.name">
+                                    <div class="flex justify-between">
+                                        <span x-text="item.qty + 'x ' + item.name"></span>
+                                        <span class="font-semibold text-slate-700" x-text="store.currency + ' ' + (item.qty * item.price).toFixed(2)"></span>
+                                    </div>
+                                </template>
+                                <div class="border-t border-slate-200 pt-1.5 mt-1.5 flex justify-between font-bold text-slate-800 text-sm">
+                                    <span>Total Pedido:</span>
+                                    <span class="text-brand-600" x-text="store.currency + ' ' + parseFloat(order.total).toFixed(2)"></span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-2 pt-1">
+                                <a :href="'https://wa.me/' + order.customerPhone + '?text=' + encodeURIComponent('¡Hola ' + order.customerName + '! Te escribo sobre tu pedido #' + order.id)" 
+                                   target="_blank" 
+                                   class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
+                                    <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                                    <span>Chat WhatsApp</span>
+                                </a>
+
+                                <select x-model="order.status" class="bg-white border border-slate-200 text-xs font-medium text-slate-700 rounded-xl px-2.5 py-2 focus:outline-none">
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="Atendido">Atendido</option>
+                                    <option value="Entregado">Entregado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </section>
+
+            <!-- TAB 4: AJUSTES -->
+            <section x-show="activeTab === 'settings'" class="space-y-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                    <h2 class="font-bold text-slate-800 text-base border-b border-slate-100 pb-2">Configuración de tu Tienda</h2>
+
+                    <!-- Store Name -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Nombre Público del Negocio</label>
+                        <input type="text" x-model="store.name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none">
+                    </div>
+
+                    <!-- Subdomain (with availability indicator) -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Enlace Web / Subdominio</label>
+                        <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-brand-500/20 focus-within:border-brand-500 focus-within:bg-white">
+                            <input type="text" x-model="store.subdomain" @input="checkSubdomain()" class="w-full bg-transparent px-3.5 py-2.5 text-sm outline-none font-mono text-slate-800">
+                            <span class="bg-slate-200 text-slate-600 px-3 py-2.5 text-xs font-mono border-l border-slate-200">.tubase.com</span>
+                        </div>
+                        <div class="flex items-center gap-1 mt-1 text-[11px]">
+                            <template x-if="subdomainAvailable">
+                                <span class="text-emerald-600 font-medium flex items-center gap-1">
+                                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Subdominio disponible
+                                </span>
+                            </template>
+                            <template x-if="!subdomainAvailable">
+                                <span class="text-rose-500 font-medium flex items-center gap-1">
+                                    <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Subdominio no disponible
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- WhatsApp Number -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">WhatsApp de Recepción de Pedidos</label>
+                        <div class="relative">
+                            <input type="text" x-model="store.whatsapp" placeholder="Ej: 584121234567" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none font-mono">
+                        </div>
+                        <p class="text-[11px] text-slate-400">Incluye código de país sin el símbolo +. Ejemplo: 584120000000</p>
+                    </div>
+
+                    <!-- Currency Selector -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Moneda de Venta</label>
+                        <select x-model="store.currency" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none font-medium text-slate-800">
+                            <option value="$">Dólares ($)</option>
+                            <option value="Bs">Bolívares (Bs)</option>
+                            <option value="€">Euros (€)</option>
+                            <option value="S/.">Soles (S/.)</option>
+                            <option value="COP">Pesos Colombianos (COP)</option>
+                        </select>
+                    </div>
+
+                    <!-- Delivery Instructions -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Indicaciones para Entregas / Compras</label>
+                        <textarea x-model="store.deliveryNotes" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none resize-none"></textarea>
+                    </div>
+
+                    <!-- Save Button -->
+                    <button @click="saveSettings()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-brand-500/20 transition active:scale-95 flex items-center justify-center gap-2">
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                        <span>Guardar Cambios</span>
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FLOATING ACTION BUTTON (FAB) FOR NEW PRODUCT -->
+        <button x-show="activeTab === 'products'" 
+                @click="openNewProductModal()" 
+                class="fixed bottom-20 right-4 md:absolute md:bottom-20 bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-full shadow-xl shadow-emerald-600/30 transition-all transform active:scale-90 z-40 flex items-center justify-center">
+            <i data-lucide="plus" class="w-6 h-6"></i>
+        </button>
+
+        <!-- BOTTOM SHEET DRAWER: CREATE / EDIT PRODUCT -->
+        <div x-show="showProductModal" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-full"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 translate-y-full"
+             class="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 backdrop-blur-xs"
+             style="display: none;">
+            
+            <div @click.away="showProductModal = false" class="bg-white w-full max-w-md rounded-t-3xl p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+                <!-- Drawer Drag Indicator -->
+                <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto"></div>
+
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <h3 class="font-bold text-slate-800 text-base" x-text="editingProduct ? 'Editar Producto' : '🚀 Nuevo Producto'"></h3>
+                    <button @click="showProductModal = false" class="text-slate-400 hover:text-slate-600 p-1">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <form @submit.prevent="saveProduct()" class="space-y-4">
+                    <!-- Photo Picker Simulation -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Foto del Producto</label>
+                        <div @click="$refs.photoInput.click()" class="border-2 border-dashed border-slate-200 hover:border-brand-500 rounded-2xl p-4 text-center cursor-pointer bg-slate-50 hover:bg-slate-100/50 transition flex flex-col items-center justify-center gap-2">
+                            <template x-if="productForm.image">
+                                <img :src="productForm.image" class="w-24 h-24 object-cover rounded-xl border shadow-xs">
+                            </template>
+                            <template x-if="!productForm.image">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center mb-1">
+                                        <i data-lucide="camera" class="w-5 h-5"></i>
+                                    </div>
+                                    <p class="text-xs font-medium text-slate-700">Tomar Foto o Elegir de Galería</p>
+                                    <p class="text-[10px] text-slate-400">Compresión WebP automática</p>
+                                </div>
+                            </template>
+                            <input type="file" x-ref="photoInput" @change="handlePhotoUpload($event)" accept="image/*" class="hidden">
+                        </div>
+                    </div>
+
+                    <!-- Name -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Nombre del Producto *</label>
+                        <input type="text" x-model="productForm.name" required placeholder="Ej. Torta Trazos de Chocolate" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-base focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none">
+                    </div>
+
+                    <!-- Price & Category Grid -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-slate-700">Precio (<span x-text="store.currency"></span>) *</label>
+                            <input type="number" step="0.01" x-model="productForm.price" required placeholder="0.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-base font-bold text-brand-600 focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-slate-700">Categoría</label>
+                            <select x-model="productForm.categoryId" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none">
+                                <template x-for="cat in categories" :key="cat.id">
+                                    <option :value="cat.id" x-text="cat.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Immediate Availability Toggle -->
+                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-800">Disponible Inmediatamente</p>
+                            <p class="text-[10px] text-slate-500">Muestra u oculta del carrito de compras</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" x-model="productForm.isAvailable" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 active:scale-95 transition flex items-center justify-center gap-2">
+                        <i data-lucide="check" class="w-5 h-5"></i>
+                        <span x-text="editingProduct ? 'Actualizar Producto' : 'Publicar Producto'"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- CATEGORY MODAL -->
+        <div x-show="showCategoryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4" style="display: none;">
+            <div class="bg-white w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-xl">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h3 class="font-bold text-slate-800 text-sm" x-text="editingCategory ? 'Editar Categoría' : 'Nueva Categoría'"></h3>
+                    <button @click="showCategoryModal = false" class="text-slate-400 p-1"><i data-lucide="x" class="w-4 h-4"></i></button>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-700">Nombre de Categoría</label>
+                    <input type="text" x-model="categoryForm.name" placeholder="Ej. Postres Fríos" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500/20">
+                </div>
+                <button @click="saveCategory()" class="w-full bg-slate-900 text-white font-semibold py-2.5 rounded-xl text-xs active:scale-95 transition">Guardar Categoría</button>
+            </div>
+        </div>
+
+        <!-- STORE FRONT PREVIEW MODAL (Client View Simulator) -->
+        <div x-show="openStorePreview" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex justify-center p-2 sm:p-4 overflow-y-auto" style="display: none;">
+            <div class="bg-slate-50 w-full max-w-md rounded-3xl overflow-hidden flex flex-col shadow-2xl relative my-auto min-h-[85vh] max-h-[90vh]">
+                
+                <!-- Simulated Buyer Header -->
+                <div class="bg-emerald-600 text-white p-4 flex items-center justify-between shadow-md">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center font-bold text-sm">
+                            <span x-text="store.name.substring(0,2).toUpperCase()"></span>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm leading-tight" x-text="store.name"></h4>
+                            <span class="text-[10px] text-emerald-100 font-mono">Vista Previa Comprador</span>
+                        </div>
+                    </div>
+                    <button @click="openStorePreview = false" class="bg-white/20 hover:bg-white/30 text-white p-1.5 rounded-full">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- Buyer Storefront Content -->
+                <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                    <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs text-emerald-800 flex items-center gap-2">
+                        <i data-lucide="info" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+                        <span>Así es exactamente como tus clientes verán tu catálogo en su navegador.</span>
+                    </div>
+
+                    <!-- Client Product Cards Grid -->
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <template x-for="p in products.filter(item => item.isAvailable)" :key="'preview-' + p.id">
+                            <div class="bg-white border border-slate-200 rounded-xl p-2.5 flex flex-col justify-between space-y-2 shadow-xs">
+                                <img :src="p.image || 'https://placehold.co/120x120/f1f5f9/94a3b8?text=Foto'" class="w-full h-24 object-cover rounded-lg">
+                                <div>
+                                    <h5 class="font-semibold text-slate-800 text-xs truncate" x-text="p.name"></h5>
+                                    <p class="text-emerald-600 font-bold text-xs" x-text="store.currency + ' ' + parseFloat(p.price).toFixed(2)"></p>
+                                </div>
+                                <button @click="addSimulatedCart(p)" class="w-full bg-slate-900 text-white text-[11px] font-medium py-1.5 rounded-lg flex items-center justify-center gap-1 active:scale-95">
+                                    <i data-lucide="plus" class="w-3 h-3"></i>
+                                    <span>Agregar</span>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Simulated WhatsApp Cart Footer -->
+                <div class="p-3 bg-white border-t border-slate-200 space-y-2">
+                    <div class="flex justify-between items-center text-xs font-semibold text-slate-700">
+                        <span>Carrito (<span x-text="simulatedCart.length"></span> items)</span>
+                        <span class="text-emerald-600 text-sm font-bold" x-text="store.currency + ' ' + simulatedCartTotal.toFixed(2)"></span>
+                    </div>
+
+                    <button @click="triggerWhatsAppOrder()" :disabled="simulatedCart.length === 0" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition active:scale-95 shadow-md">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        <span>Pedir por WhatsApp</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification Alert -->
+        <div x-show="toast.show" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 translate-y-2"
+             class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 border border-slate-700">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+            <span x-text="toast.message">Acción completada con éxito</span>
+        </div>
+
+        <!-- BOTTOM FIXED NAVIGATION BAR -->
+        <nav class="fixed bottom-0 max-w-md w-full bg-white border-t border-slate-200 px-3 py-2 flex items-center justify-around z-30 shadow-lg">
+            <button @click="activeTab = 'products'" :class="activeTab === 'products' ? 'text-brand-600 font-bold' : 'text-slate-400 hover:text-slate-600'" class="flex flex-col items-center gap-1 transition">
+                <i data-lucide="package" class="w-5 h-5"></i>
+                <span class="text-[10px]">Productos</span>
+            </button>
+
+            <button @click="activeTab = 'categories'" :class="activeTab === 'categories' ? 'text-brand-600 font-bold' : 'text-slate-400 hover:text-slate-600'" class="flex flex-col items-center gap-1 transition">
+                <i data-lucide="tags" class="w-5 h-5"></i>
+                <span class="text-[10px]">Categorías</span>
+            </button>
+
+            <button @click="activeTab = 'orders'" :class="activeTab === 'orders' ? 'text-brand-600 font-bold' : 'text-slate-400 hover:text-slate-600'" class="flex flex-col items-center gap-1 transition relative">
+                <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                <span class="text-[10px]">Pedidos</span>
+                <span x-show="orders.filter(o => o.status === 'Pendiente').length > 0" class="absolute -top-1 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+            </button>
+
+            <button @click="activeTab = 'settings'" :class="activeTab === 'settings' ? 'text-brand-600 font-bold' : 'text-slate-400 hover:text-slate-600'" class="flex flex-col items-center gap-1 transition">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+                <span class="text-[10px]">Ajustes</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- Alpine.js Application Logic -->
+    <script>
+        function adminApp() {
+            return {
+                activeTab: 'products',
+                searchQuery: '',
+                selectedCategory: 'all',
+                showProductModal: false,
+                editingProduct: null,
+                showCategoryModal: false,
+                editingCategory: null,
+                openStorePreview: false,
+                subdomainAvailable: true,
+
+                toast: {
+                    show: false,
+                    message: ''
+                },
+
+                // Store Configurations
+                store: {
+                    name: 'Postres Doña María',
+                    subdomain: 'postresmari',
+                    whatsapp: '584121234567',
+                    currency: '$',
+                    deliveryNotes: 'Entregas en la garita principal del condominio de 2pm a 6pm.'
+                },
+
+                // Categories Data
+                categories: [
+                    { id: 'cat-1', name: 'Postres & Tortas' },
+                    { id: 'cat-2', name: 'Alimentos & Salados' },
+                    { id: 'cat-3', name: 'Bebidas Frías' }
+                ],
+
+                // Products Data
+                products: [
+                    {
+                        id: 'prod-1',
+                        name: 'Torta Marquesa de Chocolate 1kg',
+                        price: 12.50,
+                        categoryId: 'cat-1',
+                        isAvailable: true,
+                        image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&auto=format&fit=crop&q=80'
+                    },
+                    {
+                        id: 'prod-2',
+                        name: 'Quesillo Tradicional Casero',
+                        price: 8.00,
+                        categoryId: 'cat-1',
+                        isAvailable: true,
+                        image: 'https://images.unsplash.com/photo-1528975604071-b4dc52a2d18c?w=300&auto=format&fit=crop&q=80'
+                    },
+                    {
+                        id: 'prod-3',
+                        name: 'Harina PAN Maíz Blanco 1kg',
+                        price: 1.20,
+                        categoryId: 'cat-2',
+                        isAvailable: false,
+                        image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300&auto=format&fit=crop&q=80'
+                    }
+                ],
+
+                // Orders Data
+                orders: [
+                    {
+                        id: '1001',
+                        customerName: 'Carlos Mendoza (Apt 4B)',
+                        customerPhone: '584149998877',
+                        date: 'Hoy, 2:30 PM',
+                        status: 'Pendiente',
+                        items: [
+                            { name: 'Torta Marquesa de Chocolate 1kg', qty: 1, price: 12.50 },
+                            { name: 'Quesillo Tradicional Casero', qty: 1, price: 8.00 }
+                        ],
+                        total: 20.50
+                    }
+                ],
+
+                // Forms
+                productForm: {
+                    id: null,
+                    name: '',
+                    price: '',
+                    categoryId: '',
+                    isAvailable: true,
+                    image: ''
+                },
+
+                categoryForm: {
+                    id: null,
+                    name: ''
+                },
+
+                // Simulated Client Cart
+                simulatedCart: [],
+
+                init() {
+                    const renderIcons = () => {
+                        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                            lucide.createIcons();
+                        }
+                    };
+                    this.$watch('activeTab', () => this.$nextTick(renderIcons));
+                    this.$watch('showProductModal', () => this.$nextTick(renderIcons));
+                    this.$watch('openStorePreview', () => this.$nextTick(renderIcons));
+                    this.$nextTick(renderIcons);
+                },
+
+                get filteredProducts() {
+                    return this.products.filter(p => {
+                        const matchesSearch = p.name.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        const matchesCat = this.selectedCategory === 'all' || p.categoryId === this.selectedCategory;
+                        return matchesSearch && matchesCat;
+                    });
+                },
+
+                getCategoryName(catId) {
+                    const cat = this.categories.find(c => c.id === catId);
+                    return cat ? cat.name : 'General';
+                },
+
+                toggleAvailability(product) {
+                    product.isAvailable = !product.isAvailable;
+                    this.showToast(product.isAvailable ? 'Producto activado' : 'Producto marcado como Agotado');
+                },
+
+                openNewProductModal() {
+                    this.editingProduct = null;
+                    this.productForm = {
+                        id: 'prod-' + Date.now(),
+                        name: '',
+                        price: '',
+                        categoryId: this.categories[0] ? this.categories[0].id : '',
+                        isAvailable: true,
+                        image: ''
+                    };
+                    this.showProductModal = true;
+                    this.$nextTick(() => {
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    });
+                },
+
+                openEditProduct(product) {
+                    this.editingProduct = product;
+                    this.productForm = { ...product };
+                    this.showProductModal = true;
+                    this.$nextTick(() => {
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    });
+                },
+
+                handlePhotoUpload(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.productForm.image = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
+
+                saveProduct() {
+                    if (this.editingProduct) {
+                        const index = this.products.findIndex(p => p.id === this.editingProduct.id);
+                        if (index !== -1) {
+                            this.products[index] = { ...this.productForm };
+                        }
+                        this.showToast('Producto actualizado con éxito');
+                    } else {
+                        this.products.unshift({ ...this.productForm });
+                        this.showToast('¡Producto publicado en tu tienda!');
+                    }
+                    this.showProductModal = false;
+                },
+
+                deleteProduct(id) {
+                    this.products = this.products.filter(p => p.id !== id);
+                    this.showToast('Producto eliminado');
+                },
+
+                openCategoryModal() {
+                    this.editingCategory = null;
+                    this.categoryForm = { id: 'cat-' + Date.now(), name: '' };
+                    this.showCategoryModal = true;
+                },
+
+                editCategory(cat) {
+                    this.editingCategory = cat;
+                    this.categoryForm = { ...cat };
+                    this.showCategoryModal = true;
+                },
+
+                saveCategory() {
+                    if (!this.categoryForm.name) return;
+                    if (this.editingCategory) {
+                        const index = this.categories.findIndex(c => c.id === this.editingCategory.id);
+                        if (index !== -1) this.categories[index].name = this.categoryForm.name;
+                    } else {
+                        this.categories.push({ ...this.categoryForm });
+                    }
+                    this.showCategoryModal = false;
+                    this.showToast('Categoría guardada');
+                },
+
+                deleteCategory(id) {
+                    this.categories = this.categories.filter(c => c.id !== id);
+                    this.showToast('Categoría eliminada');
+                },
+
+                checkSubdomain() {
+                    const reserved = ['www', 'admin', 'api', 'app'];
+                    this.subdomainAvailable = !reserved.includes(this.store.subdomain.toLowerCase().trim());
+                },
+
+                saveSettings() {
+                    this.showToast('Configuración guardada correctamente');
+                },
+
+                showToast(msg) {
+                    this.toast.message = msg;
+                    this.toast.show = true;
+                    setTimeout(() => { this.toast.show = false; }, 3000);
+                },
+
+                // Simulated Client Store Actions
+                addSimulatedCart(product) {
+                    this.simulatedCart.push(product);
+                    this.showToast('Producto agregado al carrito de prueba');
+                },
+
+                get simulatedCartTotal() {
+                    return this.simulatedCart.reduce((sum, item) => sum + parseFloat(item.price), 0);
+                },
+
+                triggerWhatsAppOrder() {
+                    let msg = `*¡Hola! Quisiera realizar el siguiente pedido en ${this.store.name}:*\n\n`;
+                    this.simulatedCart.forEach(i => {
+                        msg += `• 1x ${i.name} - ${this.store.currency}${parseFloat(i.price).toFixed(2)}\n`;
+                    });
+                    msg += `\n*Total a pagar:* ${this.store.currency}${this.simulatedCartTotal.toFixed(2)}`;
+                    msg += `\n*Indicaciones:* ${this.store.deliveryNotes}`;
+
+                    const url = `https://api.whatsapp.com/send?phone=${this.store.whatsapp}&text=${encodeURIComponent(msg)}`;
+                    window.open(url, '_blank');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
