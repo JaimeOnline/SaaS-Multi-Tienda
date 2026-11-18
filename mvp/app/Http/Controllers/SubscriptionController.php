@@ -30,7 +30,11 @@ class SubscriptionController extends Controller
             ->exists();
 
         if ($existingTrial) {
-            return back()->with('status', 'entrepreneur-trial-already-active');
+            return back()->with('toast', [
+                'type' => 'warning',
+                'title' => 'Prueba ya activa',
+                'message' => 'Ya tienes una prueba del Plan Emprendedor en curso.',
+            ]);
         }
 
         $now = now();
@@ -54,7 +58,11 @@ class SubscriptionController extends Controller
             'changed_at' => $now,
         ]);
 
-        return back()->with('status', 'entrepreneur-trial-started');
+        return back()->with('toast', [
+                'type' => 'success',
+                'title' => 'Prueba activada',
+                'message' => 'Tu prueba gratuita de 14 días del Plan Emprendedor ha comenzado.',
+            ]);
     }
 
     /**
@@ -76,9 +84,17 @@ class SubscriptionController extends Controller
         $result = $service->reactivateSubscription($subscription);
 
         if ($result) {
-            return back()->with('success', 'Suscripción reactivada correctamente.');
+            return back()->with('toast', [
+                'type' => 'success',
+                'title' => 'Suscripción reactivada',
+                'message' => 'Tu suscripción ha sido reactivada correctamente.',
+            ]);
         } else {
-            return back()->with('error', 'No se pudo reactivar la suscripción. Inténtalo de nuevo.');
+            return back()->with('toast', [
+                'type' => 'error',
+                'title' => 'Error al reactivar',
+                'message' => 'No se pudo reactivar la suscripción. Inténtalo de nuevo.',
+            ]);
         }
     }
 }

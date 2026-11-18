@@ -1,34 +1,34 @@
-<nav x-data="{ open: false }" class="border-b border-gray-200 bg-white shadow-sm">
+<nav x-data="{ open: false }" class="border-b border-surface-200 bg-white shadow-sm" role="navigation" aria-label="Navegación principal">
     <!-- Primary Navigation Menu -->
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 items-center justify-between">
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    <a href="{{ route('dashboard') }}" aria-label="{{ config('app.name', 'TuBase Express') }} - Inicio">
+                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" aria-hidden="true" />
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex" role="menubar">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" role="menuitem">
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('store.settings.edit')" :active="request()->routeIs('store.settings.*')">
+                    <x-nav-link :href="route('store.settings.edit')" :active="request()->routeIs('store.settings.*')" role="menuitem">
                         {{ __('Tienda') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
+                    <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')" role="menuitem">
                         {{ __('Categorías') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
+                    <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')" role="menuitem">
                         {{ __('Productos') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                    <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')" role="menuitem">
                         {{ __('Pedidos') }}
                     </x-nav-link>
                 </div>
@@ -74,9 +74,9 @@
 
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" type="button" aria-label="Alternar menú de navegación"
-                    class="inline-flex items-center justify-center rounded-xl p-2.5 text-gray-500 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-700 focus:bg-gray-100 focus:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                <button @click="open = ! open" type="button" aria-label="Alternar menú de navegación" :aria-expanded="open" aria-controls="mobile-menu"
+                    class="inline-flex items-center justify-center rounded-xl p-2.5 text-surface-500 transition duration-fast ease-in-out hover:bg-surface-100 hover:text-surface-700 focus:bg-surface-100 focus:text-surface-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                         <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
                             stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 6h16M4 12h16M4 18h16" />
@@ -89,38 +89,38 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden border-t border-gray-100 bg-gray-50 sm:hidden">
-        <div class="space-y-1 px-4 pb-3 pt-3">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+    <div :class="{ 'block': open, 'hidden': !open }" class="hidden border-t border-surface-200 bg-surface-50 sm:hidden" id="mobile-menu" role="navigation" aria-label="Menú móvil">
+        <div class="space-y-1 px-4 pb-3 pt-3" role="menubar">
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" role="menuitem">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('store.settings.edit')" :active="request()->routeIs('store.settings.*')">
+            <x-responsive-nav-link :href="route('store.settings.edit')" :active="request()->routeIs('store.settings.*')" role="menuitem">
                 {{ __('Tienda') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
+            <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')" role="menuitem">
                 {{ __('Categorías') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
+            <x-responsive-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')" role="menuitem">
                 {{ __('Productos') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+            <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')" role="menuitem">
                 {{ __('Pedidos') }}
             </x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
+        <div class="pt-4 pb-1 border-t border-surface-200">
             <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                <div class="font-medium text-base text-surface-800">{{ Auth::user()->name }}</div>
+                <div class="font-medium text-sm text-surface-500">{{ Auth::user()->email }}</div>
             </div>
 
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
+            <div class="mt-3 space-y-1" role="menubar">
+                <x-responsive-nav-link :href="route('profile.edit')" role="menuitem">
                     {{ __('Perfil') }}
                 </x-responsive-nav-link>
 
@@ -129,8 +129,8 @@
                     @csrf
 
                     <x-responsive-nav-link :href="route('logout')"
-                        onclick="event.preventDefault();
-                                        this.closest('form').submit();">
+                        onclick="event.preventDefault(); this.closest('form').submit();"
+                        role="menuitem">
                         {{ __('Cerrar sesión') }}
                     </x-responsive-nav-link>
                 </form>

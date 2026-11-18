@@ -2,12 +2,12 @@
     <x-slot name="header">
         <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <p class="text-sm font-medium text-indigo-600">Panel de administración</p>
-                <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                <p class="text-sm font-medium text-brand-600">Panel de administración</p>
+                <h1 class="text-xl font-semibold leading-tight text-gray-800">
                     {{ __('Dashboard') }}
-                </h2>
+                </h1>
             </div>
-            <span class="text-sm text-gray-500">Resumen de tu tienda</span>
+            <span class="text-sm text-surface-500">Resumen de tu tienda</span>
         </div>
     </x-slot>
 
@@ -16,17 +16,17 @@
             <div class="overflow-hidden rounded-2xl bg-white shadow-sm">
                 <div class="p-5 text-gray-900 sm:p-6">
                     <div
-                        class="flex flex-col gap-3 border-b border-gray-100 pb-5 sm:flex-row sm:items-start sm:justify-between">
+                        class="flex flex-col gap-3 border-b border-surface-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                            <p class="text-sm font-medium text-indigo-600">Tu tienda</p>
-                            <h3 class="mt-1 break-words text-2xl font-bold text-gray-900">
+                            <p class="text-sm font-medium text-brand-600">Tu tienda</p>
+                            <h2 class="mt-1 break-words text-2xl font-bold text-gray-900">
                                 {{ $store->name }}
-                            </h3>
+                            </h2>
                         </div>
 
                         <div class="flex flex-col items-start gap-3 sm:items-end">
                             <span
-                                class="inline-flex w-fit rounded-full px-3 py-1 text-sm font-semibold {{ $store->is_published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700' }}">
+                                class="inline-flex w-fit rounded-full px-3 py-1 text-sm font-semibold {{ $store->is_published ? 'bg-semantic-success-light text-semantic-success-dark' : 'bg-surface-100 text-surface-700' }}">
                                 {{ $store->is_published ? 'Publicada' : 'No publicada' }}
                             </span>
 
@@ -34,13 +34,13 @@
                                 @if ($store->is_published)
                                     <a href="{{ route('store.public', $store->slug) }}" target="_blank"
                                         rel="noopener noreferrer"
-                                        class="inline-flex items-center rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                        class="inline-flex items-center rounded-xl bg-brand-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
                                         Ver tienda
                                     </a>
                                 @endif
 
                                 <a href="{{ route('store.settings.edit') }}"
-                                    class="inline-flex items-center rounded-xl bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                                    class="inline-flex items-center rounded-xl bg-surface-100 px-3 py-2 text-sm font-semibold text-surface-700 transition hover:bg-surface-200 focus:outline-none focus:ring-2 focus:ring-surface-400 focus:ring-offset-2">
                                     Configurar tienda
                                 </a>
                             </div>
@@ -48,11 +48,11 @@
                     </div>
 
                     @if ($subscription?->status === 'active' && $subscription->plan?->slug === 'inicial')
-                        <div class="mt-5 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
-                            <p class="font-semibold text-indigo-900">
+                        <div class="mt-5 rounded-xl border border-brand-100 bg-brand-50 p-4">
+                            <p class="font-semibold text-brand-900">
                                 Estás usando el Plan Inicial
                             </p>
-                            <p class="mt-1 text-sm text-indigo-700">
+                            <p class="mt-1 text-sm text-brand-700">
                                 Activa tu prueba gratuita de 14 días del Plan Emprendedor para acceder a mayores
                                 límites.
                             </p>
@@ -120,20 +120,20 @@
                         </div>
                     @endif
 
-                    <dl class="mt-5 grid gap-4 text-sm text-gray-600 sm:grid-cols-2">
-                        <div class="rounded-xl bg-gray-50 p-4">
-                            <dt class="font-medium text-gray-500">Identificador</dt>
-                            <dd class="mt-1 break-all font-semibold text-gray-900">{{ $store->slug }}</dd>
+                    <dl class="mt-5 grid gap-4 text-sm text-surface-600 sm:grid-cols-2">
+                        <div class="rounded-xl bg-surface-50 p-4">
+                            <dt class="font-medium text-surface-500">Identificador</dt>
+                            <dd class="mt-1 break-all font-semibold text-surface-900">{{ $store->slug }}</dd>
                         </div>
 
-                        <div class="rounded-xl bg-gray-50 p-4">
-                            <dt class="font-medium text-gray-500">WhatsApp</dt>
-                            <dd class="mt-1 break-words font-semibold text-gray-900">{{ $store->whatsapp }}</dd>
+                        <div class="rounded-xl bg-surface-50 p-4">
+                            <dt class="font-medium text-surface-500">WhatsApp</dt>
+                            <dd class="mt-1 break-words font-semibold text-surface-900">{{ $store->whatsapp }}</dd>
                         </div>
 
-                        <div class="rounded-xl bg-gray-50 p-4">
-                            <dt class="font-medium text-gray-500">Moneda</dt>
-                            <dd class="mt-1 font-semibold text-gray-900">{{ $store->currency }}</dd>
+                        <div class="rounded-xl bg-surface-50 p-4">
+                            <dt class="font-medium text-surface-500">Moneda</dt>
+                            <dd class="mt-1 font-semibold text-surface-900">{{ $store->currency }}</dd>
                         </div>
                     </dl>
                 </div>

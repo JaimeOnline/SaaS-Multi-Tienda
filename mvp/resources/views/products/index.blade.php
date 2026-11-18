@@ -2,14 +2,14 @@
     <x-slot name="header">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <p class="text-sm font-medium text-indigo-600">Gestión del catálogo</p>
+                <p class="text-sm font-medium text-brand-600">Gestión del catálogo</p>
                 <h2 class="text-xl font-semibold leading-tight text-gray-800">
                     Productos
                 </h2>
             </div>
 
             <a href="{{ route('dashboard') }}"
-                class="inline-flex w-fit items-center rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                class="inline-flex w-fit items-center rounded-xl bg-surface-100 px-3 py-2 text-sm font-semibold text-surface-700 transition hover:bg-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
                 Volver al dashboard
             </a>
         </div>
@@ -17,12 +17,6 @@
 
     <div class="py-8 sm:py-12">
         <div class="mx-auto max-w-6xl space-y-6 px-4 sm:px-6 lg:px-8">
-            @if (session('status'))
-                <div class="rounded-md bg-green-50 p-4 text-sm text-green-700">
-                    La operación se realizó correctamente.
-                </div>
-            @endif
-
             @if ($errors->any())
                 <div class="rounded-md bg-red-50 p-4 text-sm text-red-700">
                     <ul class="list-disc list-inside">

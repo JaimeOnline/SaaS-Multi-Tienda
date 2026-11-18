@@ -57,7 +57,11 @@ class CategoryController extends Controller
         ]);
 
         return Redirect::route('categories.index')
-            ->with('status', 'category-created');
+            ->with('toast', [
+                'type' => 'success',
+                'title' => 'Categoría creada',
+                'message' => 'La categoría se ha creado correctamente.',
+            ]);
     }
 
     /**
@@ -77,7 +81,11 @@ class CategoryController extends Controller
         ]);
 
         return Redirect::route('categories.index')
-            ->with('status', 'category-updated');
+            ->with('toast', [
+                'type' => 'success',
+                'title' => 'Categoría actualizada',
+                'message' => 'La categoría se ha actualizado correctamente.',
+            ]);
     }
 
     /**
@@ -90,6 +98,10 @@ class CategoryController extends Controller
         $category->delete();
 
         return Redirect::route('categories.index')
-            ->with('status', 'category-deleted');
+            ->with('toast', [
+                'type' => 'success',
+                'title' => 'Categoría eliminada',
+                'message' => 'La categoría se ha eliminado correctamente.',
+            ]);
     }
 }

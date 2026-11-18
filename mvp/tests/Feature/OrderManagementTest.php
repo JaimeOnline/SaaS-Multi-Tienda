@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\Store;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class OrderManagementTest extends TestCase
@@ -85,7 +86,11 @@ class OrderManagementTest extends TestCase
 
         $response
             ->assertRedirect()
-            ->assertSessionHas('status', 'order-updated');
+            ->assertSessionHas('toast', function ($toast) {
+                return $toast['type'] === 'success'
+                    && $toast['title'] === 'Pedido actualizado'
+                    && Str::contains($toast['message'], 'cambiado a');
+            });
 
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,

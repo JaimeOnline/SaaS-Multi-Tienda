@@ -81,7 +81,11 @@ class ProductController extends Controller
         }
 
         return Redirect::route('products.index')
-            ->with('status', 'product-created');
+            ->with('toast', [
+                'type' => 'success',
+                'title' => 'Producto creado',
+                'message' => "«{$product->name}» ya está en tu catálogo.",
+            ]);
     }
 
     /**
@@ -132,7 +136,11 @@ class ProductController extends Controller
         }
 
         return Redirect::route('products.index')
-            ->with('status', 'product-updated');
+            ->with('toast', [
+                'type' => 'success',
+                'title' => 'Producto actualizado',
+                'message' => "«{$product->name}» se ha guardado correctamente.",
+            ]);
     }
 
     /**
@@ -153,7 +161,11 @@ class ProductController extends Controller
         $product->delete();
 
         return Redirect::route('products.index')
-            ->with('status', 'product-deleted');
+            ->with('toast', [
+                'type' => 'success',
+                'title' => 'Producto eliminado',
+                'message' => 'El producto se ha eliminado correctamente.',
+            ]);
     }
 
     private function processImage(UploadedFile $image, string $directory): string

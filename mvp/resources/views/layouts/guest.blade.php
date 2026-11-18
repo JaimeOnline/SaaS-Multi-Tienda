@@ -17,17 +17,24 @@
 </head>
 
 <body class="font-sans text-gray-900 antialiased">
-    <div class="flex min-h-screen flex-col items-center bg-slate-50 px-4 py-8 sm:px-6">
-        <div>
-            <a href="/" aria-label="Ir al inicio">
-                <x-application-logo class="h-20 w-20 fill-current text-indigo-500" />
-            </a>
-        </div>
+    <!-- Skip Link -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:start-4 z-50 px-4 py-2 bg-brand-600 text-white rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
+        Saltar al contenido principal
+    </a>
 
-        <div
-            class="mt-6 w-full rounded-2xl border border-slate-100 bg-white px-5 py-6 shadow-sm sm:px-8 {{ request()->routeIs('store.public', 'cart.index') ? 'max-w-7xl' : 'max-w-md' }}">
+    <div class="flex min-h-screen flex-col items-center bg-slate-50 px-4 py-8 sm:px-6">
+        <!-- Toast Container -->
+        @include('components.ui.toast-container')
+
+        <header class="w-full max-w-md mb-6 text-center">
+            <a href="/" aria-label="Ir al inicio">
+                <x-application-logo class="h-20 w-20 fill-current text-brand-600 mx-auto" />
+            </a>
+        </header>
+
+        <main id="main-content" class="w-full rounded-2xl border border-slate-200 bg-white px-5 py-6 shadow-sm sm:px-8 {{ request()->routeIs('store.public', 'cart.index') ? 'max-w-7xl' : 'max-w-md' }}" role="main">
             {{ $slot }}
-        </div>
+        </main>
     </div>
 </body>
 

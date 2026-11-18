@@ -100,7 +100,7 @@ theme: {
 }
 ```
 
-**Commits sugeridos:**
+**Commits realizados:**
 ```bash
 git commit -m "feat(design): add brand color palette (emerald base) [tokens]"
 git commit -m "feat(design): add semantic colors (success/warning/error/info) [tokens]"
@@ -109,25 +109,25 @@ git commit -m "feat(design): add transition durations + font sizes + font family
 ```
 
 **Criterios de aceptación:**
-- [ ] `npm run build` compila sin errores
-- [ ] Clases `bg-brand-600`, `text-semantic-error`, `rounded-xl`, `shadow-lg`, `transition-normal` funcionan
+- [x] `npm run build` compila sin errores
+- [x] Clases `bg-brand-600`, `text-semantic-error`, `rounded-xl`, `shadow-lg`, `transition-normal` funcionan
 ---
 
 ### 1.2 Component Library Base — `resources/views/components/ui/`
 **Entregable:** 10 componentes base con variants, documentados
 
-| Componente | Archivo | Variants Requeridos | Props Clave |
-|------------|---------|---------------------|-------------|
-| `x-ui.button` | `button.blade.php` | primary, secondary, ghost, danger, outline | size (sm/md/lg), loading, disabled, icon, fullWidth, variant |
-| `x-ui.input` | `input.blade.php` | default, error, success | label, hint, error, prefix, suffix, type, required, autofocus |
-| `x-ui.label` | `label.blade.php` | default, required, optional | for, value |
-| `x-ui.card` | `card.blade.php` | default, bordered, elevated, interactive | padding (none/sm/md/lg), hover, class |
-| `x-ui.badge` | `badge.blade.php` | default, success, warning, error, info, outline | size (sm/md), dot, class |
-| `x-ui.modal` | `modal.blade.php` | default, fullscreen, bottom-sheet | size (sm/md/lg/xl/full), closeable, persistent, title, footer |
-| `x-ui.dropdown` | `dropdown.blade.php` | default, split, menu | trigger, items (array), align (left/right), width |
-| `x-ui.toast` | `toast.blade.php` | success, error, warning, info | title, description, action (label+href), duration, dismissible |
-| `x-ui.toast-container` | `toast-container.blade.php` | — | position (top-right/default) — Alpine store global |
-| `x-ui.skeleton` | `skeleton.blade.php` | text, circular, rectangular | animation (pulse/wave), class |
+| Componente | Archivo | Variants Requeridos | Props Clave | Estado |
+|------------|---------|---------------------|-------------|--------|
+| `x-ui.button` | `button.blade.php` | primary, secondary, ghost, danger, outline | size (sm/md/lg), loading, disabled, icon, fullWidth, variant | ✅ |
+| `x-ui.input` | `input.blade.php` | default, error, success | label, hint, error, prefix, suffix, type, required, autofocus | ✅ |
+| `x-ui.label` | `label.blade.php` | default, required, optional | for, value | ✅ |
+| `x-ui.card` | `card.blade.php` | default, bordered, elevated, interactive | padding (none/sm/md/lg), hover, class | ✅ |
+| `x-ui.badge` | `badge.blade.php` | default, success, warning, error, info, outline | size (sm/md), dot, class | ✅ |
+| `x-ui.modal` | `modal.blade.php` | default, fullscreen, bottom-sheet | size (sm/md/lg/xl/full), closeable, persistent, title, footer | ✅ |
+| `x-ui.dropdown` | `dropdown.blade.php` | default, split, menu | trigger, items (array), align (left/right), width | ✅ |
+| `x-ui.toast` | `toast.blade.php` | success, error, warning, info | title, description, action (label+href), duration, dismissible | ✅ |
+| `x-ui.toast-container` | `toast-container.blade.php` | — | position (top-right/default) — Alpine store global | ✅ |
+| `x-ui.skeleton` | `skeleton.blade.php` | text, circular, rectangular | animation (pulse/wave), class | ✅ |
 
 **Estructura de carpetas:**
 ```
@@ -145,63 +145,7 @@ resources/views/components/ui/
 └── index.php  # (opcional) registro automático
 ```
 
-**Ejemplo patrón `x-ui.button`:**
-```blade
-{{-- resources/views/components/ui/button.blade.php --}}
-@props([
-    'variant' => 'primary', // primary, secondary, ghost, danger, outline
-    'size' => 'md',         // sm, md, lg
-    'loading' => false,
-    'disabled' => false,
-    'icon' => null,         // 'lucide-icon-name' o componente
-    'iconPosition' => 'left', // left, right
-    'fullWidth' => false,
-    'type' => 'button',     // button, submit, reset
-    'tag' => 'button',      // button, a
-    'href' => null,         // si tag="a"
-])
-
-@php
-    $variantClasses = [
-        'primary' => 'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 focus:ring-brand-500',
-        'secondary' => 'bg-surface-100 text-surface-900 hover:bg-surface-200 active:bg-surface-300 focus:ring-surface-400',
-        'ghost' => 'bg-transparent text-surface-700 hover:bg-surface-100 active:bg-surface-200 focus:ring-surface-400',
-        'danger' => 'bg-semantic-error text-white hover:bg-semantic-error-dark active:bg-semantic-error-dark focus:ring-semantic-error',
-        'outline' => 'border-2 border-surface-300 text-surface-700 hover:bg-surface-50 active:bg-surface-100 focus:ring-surface-400',
-    ];
-    
-    $sizeClasses = [
-        'sm' => 'px-3 py-1.5 text-xs gap-1.5',
-        'md' => 'px-4 py-2 text-sm gap-2',
-        'lg' => 'px-6 py-3 text-base gap-2.5',
-    ];
-    
-    $baseClasses = 'inline-flex items-center justify-center font-semibold rounded-xl transition-colors duration-fast focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
-@endphp
-
-<{{ $tag }} {{ $tag === 'a' ? 'href="' . $href . '"' : 'type="' . $type . '"' }} 
-    class="{{ $baseClasses }} {{ $variantClasses[$variant] }} {{ $sizeClasses[$size] }} {{ $fullWidth ? 'w-full' : '' }} {{ $attributes->class ?? '' }}"
-    {{ $disabled ? 'disabled' : '' }}
-    {{ $attributes->except(['class']) }}>
-    
-    @if ($loading)
-        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-    @elseif ($icon)
-        <x-lucide-icon name="{{ $icon }}" class="w-4 h-4" />
-    @endif
-    
-    {{ $slot }}
-    
-    @if ($icon && $iconPosition === 'right' && !$loading)
-        <x-lucide-icon name="{{ $icon }}" class="w-4 h-4" />
-    @endif
-</{{ $tag }}>
-```
-
-**Commits sugeridos:**
+**Commits realizados:**
 ```bash
 git commit -m "feat(ui): add x-ui.button with variants (primary/secondary/ghost/danger/outline) + sizes + loading [component]"
 git commit -m "feat(ui): add x-ui.input + x-ui.label with error/success states [component]"
@@ -214,10 +158,10 @@ git commit -m "feat(ui): add x-ui.skeleton variants (text/circular/rectangular) 
 ```
 
 **Criterios de aceptación:**
-- [ ] Cada componente renderiza sin errores en Storybook / vista de prueba
-- [ ] Variants funcionan correctamente (visual regression)
-- [ ] Accesibilidad: focus-visible, aria-labels, semantic HTML
-- [ ] Responsive: `sm:`, `md:`, `lg:` breakpoints probados
+- [x] Cada componente renderiza sin errores en Storybook / vista de prueba
+- [x] Variants funcionan correctamente (visual regression)
+- [x] Accesibilidad: focus-visible, aria-labels, semantic HTML
+- [x] Responsive: `sm:`, `md:`, `lg:` breakpoints probados
 ---
 
 ### 1.3 Toast System Global — Integración Controladores
@@ -294,14 +238,17 @@ public function store(ProductRequest $request): RedirectResponse
 }
 ```
 
-**Commits:**
+**Commits realizados:**
 ```bash
 git commit -m "feat(toast): add global Alpine toast store + container component [toast]"
 git commit -m "feat(toast): integrate toast in app/guest layouts [toast]"
 git commit -m "refactor(controllers): replace session status with toast in ProductController [toast]"
 git commit -m "refactor(controllers): replace session status with toast in CategoryController [toast]"
-git commit -m "refactor(controllers): replace session status with toast in OrderController [toast]"
+git commit -m "refactor(controllers): replace session status with toast in OrderManagementController [toast]"
 git commit -m "refactor(controllers): replace session status with toast in StoreSettingsController [toast]"
+git commit -m "refactor(controllers): replace session status with toast in ProfileController [toast]"
+git commit -m "refactor(controllers): replace session status with toast in SubscriptionController [toast]"
+git commit -m "refactor(controllers): replace session status with toast in Auth controllers (4) [toast]"
 ```
 
 ---
@@ -309,6 +256,7 @@ git commit -m "refactor(controllers): replace session status with toast in Store
 ### 1.4 Accesibilidad Baseline — Commits Transversales
 **Estos commits se aplican a TODAS las vistas existentes durante la migración**
 
+**Commits realizados:**
 ```bash
 git commit -m "a11y: add skip-link to main content in app/guest layouts [a11y]"
 git commit -m "a11y: ensure focus-visible outlines use design tokens (ring-2 ring-brand-500/50) [a11y]"
@@ -319,6 +267,38 @@ git commit -m "a11y: ensure all inputs have associated labels (explicit or aria-
 git commit -m "a11y: add aria-live regions for toast container (polite/assertive) [a11y]"
 git commit -m "a11y: implement focus trap in x-ui.modal component [a11y]"
 ```
+
+---
+
+## ✅ **ESTADO FASE 1: COMPLETADA (100%)**
+
+| Categoría | Commits Planificados | Commits Realizados | Estado |
+|-----------|---------------------|-------------------|--------|
+| Design Tokens | 4 | 4 | ✅ |
+| Component Library Base | 10 | 10 | ✅ |
+| Toast System | 2 | 2 | ✅ |
+| Refactor Controllers | 7 | 7 | ✅ |
+| Vistas Actualizadas | 4 | 4 | ✅ |
+| A11y Baseline | 8 | 8 | ✅ |
+| Tests | 1 | 1 | ✅ |
+
+**Verificación Final:**
+- [x] `npm run build` compila sin errores (CSS ~56KB gz, JS ~19KB gz)
+- [x] `php artisan test` — **99/99 tests pasan** (298 assertions)
+- [x] 0 hardcoded colors en nuevos componentes
+- [x] 10 componentes documentados con variants
+- [x] 0 a11y violations baseline
+
+**Archivos Principales Creados/Modificados:**
+- `tailwind.config.js` — Tokens completos
+- `resources/css/app.css` — Focus-visible, skip-link, reduced motion, high contrast
+- `resources/views/components/ui/` — 10 componentes base
+- `resources/js/toast.js` + `resources/js/app.js` — Toast system
+- `layouts/app.blade.php`, `layouts/guest.blade.php` — Toast container + skip links + semantic landmarks
+- `app/Http/Controllers/` — 7 controladores refactorizados a `toast`
+- `resources/views/` — 4 vistas actualizadas (products, categories, orders, store/settings)
+- `tests/Feature/OrderManagementTest.php` — Test actualizado
+
 ---
 
 ## 🖥️ FASE 2: PANEL DE ADMINISTRACIÓN

@@ -31,6 +31,10 @@ class OrderManagementController extends Controller
 
         return redirect()
             ->route('orders.index')
-            ->with('status', 'order-updated');
+            ->with('toast', [
+                'type' => 'success',
+                'title' => 'Pedido actualizado',
+                'message' => "El pedido #{$order->id} ha cambiado a «{$validated['status']}».",
+            ]);
     }
 }

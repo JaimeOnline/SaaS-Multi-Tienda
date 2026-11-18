@@ -28,6 +28,10 @@ class StoreSettingsController extends Controller
         $request->user()->store->update($request->validated());
 
         return Redirect::route('store.settings.edit')
-            ->with('status', 'store-settings-updated');
+            ->with('toast', [
+                'type' => 'success',
+                'title' => 'Configuración guardada',
+                'message' => 'Los ajustes de tu tienda se han actualizado correctamente.',
+            ]);
     }
 }
