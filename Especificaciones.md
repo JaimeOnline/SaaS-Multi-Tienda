@@ -1825,3 +1825,209 @@ Ejemplo o modelo para ajustar lo necesario
 </body>
 </html>
 
+---
+
+# Especificación funcional consolidada de la SaaS post-MVP
+
+## 1. Objetivo
+
+Evolucionar el MVP validado hacia una plataforma SaaS para que pequeños negocios creen y administren una tienda online, publiquen un catálogo, reciban pedidos y gestionen su afiliación mensual.
+
+La evolución se desarrollará inicialmente en entorno local. La preparación para producción, los cobros reales y la integración con una pasarela de pagos quedan pospuestos hasta autorización explícita.
+
+## 2. Estado actual disponible
+
+La plataforma ya dispone de:
+
+- Registro e inicio de sesión.
+- Una tienda inicial por usuario.
+- Configuración básica de la tienda.
+- Categorías y productos aislados por tienda.
+- Imágenes optimizadas y galería pública.
+- Catálogo público responsive.
+- Carrito mediante sesión.
+- Pedidos persistentes.
+- Enlaces a WhatsApp.
+- Panel administrativo de pedidos.
+- Landing inicial conectada a registro e inicio de sesión.
+- Suite completa validada: 62 pruebas aprobadas y 184 aserciones.
+
+## 3. Planes comerciales aprobados
+
+### 3.1 Plan Inicial — Gratis
+
+- Precio: `$0`, permanente.
+- Una tienda por usuario.
+- Hasta 2 productos.
+- Hasta 2 categorías.
+- Una imagen optimizada por producto.
+- Catálogo público, carrito y pedidos por WhatsApp.
+- Panel básico de pedidos.
+- Subdominio lógico de la plataforma.
+- Soporte mediante documentación.
+- Publicidad y marca visible de la plataforma.
+- Sin estadísticas avanzadas.
+- Sin personalización avanzada.
+- Sin soporte prioritario.
+
+### 3.2 Plan Emprendedor — Crecimiento
+
+- Precio: `$4.99 USD/mes`.
+- Hasta 20 productos.
+- Hasta 20 categorías.
+- Galería de imágenes por producto.
+- Historial completo de pedidos.
+- Estadísticas básicas.
+- Personalización básica de la tienda.
+- Mayor capacidad de almacenamiento.
+- Soporte prioritario.
+- Sin publicidad de la plataforma.
+
+### 3.3 Plan Profesional — Negocio
+
+- Precio: `$9.99 USD/mes`.
+- Hasta 500 productos.
+- Categorías ampliadas.
+- Mayor capacidad de almacenamiento.
+- Estadísticas avanzadas.
+- Gestión de clientes.
+- Inventario y control de stock.
+- Variantes de productos.
+- Cupones y promociones.
+- Exportación de pedidos.
+- Soporte prioritario ampliado.
+
+Las funcionalidades no implementadas deberán aparecer como “Próximamente” y no promocionarse como disponibles.
+
+## 4. Prueba gratuita y ciclo de suscripción
+
+- El Plan Inicial es gratuito permanentemente.
+- El Plan Emprendedor tendrá una prueba gratuita de 14 días.
+- No se solicitará tarjeta durante la prueba inicial.
+- Se enviarán recordatorios 7, 3 y 1 día antes del vencimiento.
+- El periodo de gracia será de 7 días.
+- Durante la gracia se mostrarán avisos de pago y la política de regularización.
+- Tras la gracia, la tienda podrá suspenderse temporalmente.
+- La suspensión no eliminará productos, pedidos, imágenes ni configuración.
+- La reactivación ocurrirá después de confirmar el pago.
+- Los cambios deberán conservar trazabilidad e historial.
+
+## 5. Estados de suscripción
+
+Estados mínimos:
+
+- `trialing`: prueba gratuita activa.
+- `active`: suscripción pagada y vigente.
+- `past_due`: pago pendiente o fallido.
+- `grace_period`: periodo de gracia.
+- `suspended`: acceso comercial suspendido.
+- `cancelled`: suscripción cancelada.
+- `expired`: suscripción finalizada sin renovación.
+
+Cada suscripción deberá conservar:
+
+- Plan.
+- Fecha de inicio.
+- Fecha de vencimiento.
+- Próxima renovación.
+- Fecha de inicio y fin de gracia.
+- Fecha de cancelación.
+- Motivo del cambio de estado.
+- Historial de transiciones.
+
+## 6. Pagos y renovaciones
+
+La arquitectura futura deberá incluir:
+
+- Historial de pagos.
+- Renovaciones mensuales.
+- Reembolsos e incidencias.
+- Identificador externo del proveedor.
+- Validación de firma de webhooks.
+- Idempotencia para evitar duplicados.
+- Conciliación entre proveedor y aplicación.
+- Registro de eventos de pago.
+- No almacenar números de tarjeta ni códigos sensibles.
+- Separación entre estado de pago y estado de suscripción.
+
+La integración con una pasarela concreta se decidirá después de validar el mercado objetivo, país, moneda y proveedor disponible.
+
+## 7. Reglas de acceso
+
+- El usuario autenticado solo podrá administrar su tienda.
+- El aislamiento por `store_id` se mantendrá en todas las consultas.
+- El Plan Inicial tendrá límites verificables en servidor.
+- Los límites nunca dependerán únicamente del frontend.
+- La suspensión deberá impedir nuevas operaciones comerciales según la política definida.
+- Los datos históricos deberán permanecer consultables cuando corresponda.
+- Ninguna suspensión eliminará información automáticamente.
+
+## 8. Onboarding posterior al registro
+
+Después del registro, el usuario deberá poder completar:
+
+- Nombre comercial.
+- Slug o identificador público.
+- Número de WhatsApp.
+- Moneda.
+- Indicaciones de entrega.
+- Imagen o identidad visual futura.
+- Publicación de la tienda.
+
+El onboarding deberá validar los datos mínimos antes de permitir publicar el catálogo.
+
+## 9. Landing y conversión
+
+La landing deberá incluir:
+
+- Propuesta de valor clara.
+- Beneficios de vender mediante catálogo y WhatsApp.
+- Demo visual del catálogo y panel.
+- Funcionalidades disponibles actualmente.
+- Planes y precios.
+- Prueba gratuita y límites.
+- Preguntas frecuentes.
+- Llamadas a registro e inicio de sesión.
+- Separación visible entre funciones actuales y futuras.
+- SEO básico, accesibilidad y rendimiento.
+- Términos, privacidad y política de cookies.
+
+## 10. Funcionalidades post-MVP futuras
+
+- Inventario y stock.
+- Clientes e historial de compras.
+- Variantes de productos.
+- Cupones y promociones.
+- Estadísticas y métricas.
+- Notificaciones de pedidos.
+- Roles y permisos.
+- Auditoría y registro de actividad.
+- Exportación de datos.
+- Soporte y centro de ayuda.
+- Evolución progresiva hacia varias tiendas por usuario.
+
+## 11. Seguridad y buenas prácticas
+
+- No exponer secretos ni valores privados del entorno.
+- Mantener autorización y aislamiento por tienda.
+- Validar límites en backend.
+- Utilizar políticas y middleware para acceso.
+- Proteger webhooks y validar firmas.
+- Aplicar idempotencia a eventos externos.
+- Mantener copias de seguridad antes de producción.
+- Registrar errores sin almacenar datos financieros sensibles.
+- Mantener pruebas automatizadas para cada regla crítica.
+
+## 12. Criterios generales de aceptación post-MVP
+
+Cada funcionalidad deberá:
+
+- Tener requisitos funcionales claros.
+- Definir sus estados y reglas de negocio.
+- Mantener compatibilidad con el MVP.
+- Incluir pruebas automatizadas.
+- Ser validada manualmente cuando afecte a la interfaz.
+- Respetar el aislamiento por tienda.
+- Documentarse antes o después de su implementación.
+- Desarrollarse de forma atómica en entorno local.
+
