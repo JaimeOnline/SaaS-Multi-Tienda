@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <p class="text-sm font-medium text-brand-600">Panel de administración</p>
+                <p class="text-sm font-medium text-brand-600">Panel de administraci&oacute;n</p>
                 <h1 class="text-xl font-semibold leading-tight text-gray-800">
                     {{ __('Dashboard') }}
                 </h1>
@@ -12,132 +12,190 @@
     </x-slot>
 
     <div class="py-8 sm:py-12">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="overflow-hidden rounded-2xl bg-white shadow-sm">
-                <div class="p-5 text-gray-900 sm:p-6">
-                    <div
-                        class="flex flex-col gap-3 border-b border-surface-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-brand-600">Tu tienda</p>
-                            <h2 class="mt-1 break-words text-2xl font-bold text-gray-900">
-                                {{ $store->name }}
-                            </h2>
-                        </div>
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
+            
+            <!-- 1. SUBSCRIPTION STATUS BANNER -->
+            @include('dashboard.partials.subscription-banner')
 
-                        <div class="flex flex-col items-start gap-3 sm:items-end">
-                            <span
-                                class="inline-flex w-fit rounded-full px-3 py-1 text-sm font-semibold {{ $store->is_published ? 'bg-semantic-success-light text-semantic-success-dark' : 'bg-surface-100 text-surface-700' }}">
-                                {{ $store->is_published ? 'Publicada' : 'No publicada' }}
-                            </span>
-
-                            <div class="flex flex-wrap gap-2">
-                                @if ($store->is_published)
-                                    <a href="{{ route('store.public', $store->slug) }}" target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="inline-flex items-center rounded-xl bg-brand-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
-                                        Ver tienda
-                                    </a>
-                                @endif
-
-                                <a href="{{ route('store.settings.edit') }}"
-                                    class="inline-flex items-center rounded-xl bg-surface-100 px-3 py-2 text-sm font-semibold text-surface-700 transition hover:bg-surface-200 focus:outline-none focus:ring-2 focus:ring-surface-400 focus:ring-offset-2">
-                                    Configurar tienda
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    @if ($subscription?->status === 'active' && $subscription->plan?->slug === 'inicial')
-                        <div class="mt-5 rounded-xl border border-brand-100 bg-brand-50 p-4">
-                            <p class="font-semibold text-brand-900">
-                                Estás usando el Plan Inicial
-                            </p>
-                            <p class="mt-1 text-sm text-brand-700">
-                                Activa tu prueba gratuita de 14 días del Plan Emprendedor para acceder a mayores
-                                límites.
-                            </p>
-
-                            <form method="POST" action="{{ route('subscriptions.entrepreneur-trial.start') }}"
-                                class="mt-3">
-                                @csrf
-                                <button type="submit"
-                                    class="inline-flex rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                    Activar prueba gratuita
-                                </button>
-                            </form>
-                        </div>
-                    @elseif ($subscription?->status === 'trialing')
-                        <div class="mt-5 rounded-xl border border-emerald-100 bg-emerald-50 p-4">
-                            <p class="font-semibold text-emerald-900">
-                                Prueba del Plan Emprendedor activa
-                            </p>
-                            <p class="mt-1 text-sm text-emerald-700">
-                                Vence el {{ $subscription->expires_at?->format('d/m/Y H:i') }}.
-                            </p>
-                        </div>
-                    @endif
-
-                    @if ($subscription?->status === 'grace_period')
-                        <div class="mt-5 rounded-xl border border-amber-100 bg-amber-50 p-4">
-                            <p class="font-semibold text-amber-900">
-                                Periodo de gracia activo
-                            </p>
-                            <p class="mt-1 text-sm text-amber-700">
-                                Vence prueba: {{ $subscription->expires_at?->format('d/m/Y H:i') }}.
-                                <br>Gracia hasta: {{ $subscription->grace_period_ends_at?->format('d/m/Y H:i') }}.
-                            </p>
-                        </div>
-                    @endif
-
-                    @if ($subscription?->status === 'suspended')
-                        <div class="mt-5 rounded-xl border border-red-100 bg-red-50 p-4">
-                            <p class="font-semibold text-red-900">
-                                Suspendida
-                            </p>
-                            <p class="mt-1 text-sm text-red-700">
-                                {{ $subscription->status_reason ?: 'Periodo de gracia finalizado; suscripción suspendida.' }}
-                            </p>
-
-                            <!-- Formulario de reactivación -->
-                            <form method="POST" action="{{ route('subscriptions.reactivate') }}" class="mt-3">
-                                @csrf
-                                <button type="submit" class="inline-flex rounded-xl bg-green-600 text-slate-900 font-bold text-xs px-4 py-2 uppercase transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                                    <span class="sr-only">Reactivar suscripción</span>
-                                    Reactivar
-                                </button>
-                            </form>
-                        </div>
-                    @endif
-
-                    @if ($subscription?->status === 'expired')
-                        <div class="mt-5 rounded-xl border border-gray-100 bg-gray-50 p-4">
-                            <p class="font-semibold text-gray-900">
-                                Prueba expirada
-                            </p>
-                            <p class="mt-1 text-sm text-gray-700">
-                                {{ $subscription->expires_at?->format('d/m/Y H:i') }}
-                            </p>
-                        </div>
-                    @endif
-
-                    <dl class="mt-5 grid gap-4 text-sm text-surface-600 sm:grid-cols-2">
-                        <div class="rounded-xl bg-surface-50 p-4">
-                            <dt class="font-medium text-surface-500">Identificador</dt>
-                            <dd class="mt-1 break-all font-semibold text-surface-900">{{ $store->slug }}</dd>
-                        </div>
-
-                        <div class="rounded-xl bg-surface-50 p-4">
-                            <dt class="font-medium text-surface-500">WhatsApp</dt>
-                            <dd class="mt-1 break-words font-semibold text-surface-900">{{ $store->whatsapp }}</dd>
-                        </div>
-
-                        <div class="rounded-xl bg-surface-50 p-4">
-                            <dt class="font-medium text-surface-500">Moneda</dt>
-                            <dd class="mt-1 font-semibold text-surface-900">{{ $store->currency }}</dd>
-                        </div>
-                    </dl>
+            <!-- 2. METRICS CARDS (4 cards con sparklines) -->
+            <section aria-labelledby="metrics-heading" class="space-y-4">
+                <h2 id="metrics-heading" class="sr-only">M&eacute;tricas principales</h2>
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    @include('dashboard.partials.metric-card', [
+                        'label' => 'Pedidos hoy',
+                        'value' => $ordersToday,
+                        'sparkline' => $ordersSparkline,
+                        'icon' => 'shopping-bag',
+                        'iconColor' => 'brand',
+                        'actionText' => 'Ver pedidos',
+                        'actionUrl' => route('orders.index'),
+                    ])
+                    @include('dashboard.partials.metric-card', [
+                        'label' => 'Ingresos este mes',
+                        'value' => number_format($revenueThisMonth, 2, ',', '.') . ' ' . $store->currency,
+                        'sparkline' => $revenueSparkline,
+                        'icon' => 'currency-eur',
+                        'iconColor' => 'success',
+                        'actionText' => 'Ver reporte',
+                        'actionUrl' => '#',
+                        'actionDisabled' => true,
+                    ])
+                    @include('dashboard.partials.metric-card', [
+                        'label' => 'Productos activos',
+                        'value' => $activeProducts,
+                        'sparkline' => null,
+                        'icon' => 'package',
+                        'iconColor' => 'info',
+                        'actionText' => 'Nuevo producto',
+                        'actionType' => 'modal',
+                        'actionModal' => 'product-create',
+                    ])
+                    @include('dashboard.partials.metric-card', [
+                        'label' => 'Tasa conversi&oacute;n',
+                        'value' => '--%',
+                        'sparkline' => null,
+                        'icon' => 'trending-up',
+                        'iconColor' => 'warning',
+                        'actionText' => 'Ver tienda',
+                        'actionUrl' => route('store.public', $store->slug),
+                        'actionTarget' => '_blank',
+                    ])
                 </div>
-            </div>
+            </section>
+
+<!-- 3. QUICK ACTIONS GRID (6 acciones) -->
+            <section aria-labelledby="actions-heading" class="space-y-4">
+                <h2 id="actions-heading" class="text-lg font-semibold text-surface-900">Acciones r&aacute;pidas</h2>
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    @include('dashboard.partials.quick-action', [
+                        'icon' => 'plus-circle',
+                        'label' => 'Nuevo producto',
+                        'type' => 'modal',
+                        'modal' => 'product-create',
+                        'variant' => 'primary',
+                    ])
+                    @include('dashboard.partials.quick-action', [
+                        'icon' => 'clock',
+                        'label' => 'Pedidos pendientes',
+                        'url' => route('orders.index', ['status' => 'pending']),
+                        'badge' => $pendingOrdersCount,
+                    ])
+                    @include('dashboard.partials.quick-action', [
+                        'icon' => 'share-2',
+                        'label' => 'Compartir tienda',
+                        'type' => 'modal',
+                        'modal' => 'share-store',
+                        'variant' => 'secondary',
+                    ])
+                    @include('dashboard.partials.quick-action', [
+                        'icon' => 'settings',
+                        'label' => 'Configurar tienda',
+                        'url' => route('store.settings.edit'),
+                        'variant' => 'secondary',
+                    ])
+                    @include('dashboard.partials.quick-action', [
+                        'icon' => 'folder-tree',
+                        'label' => 'Gestionar categor&iacute;as',
+                        'url' => route('categories.index'),
+                        'variant' => 'secondary',
+                    ])
+                    @include('dashboard.partials.quick-action', [
+                        'icon' => 'store',
+                        'label' => 'Ver cat&aacute;logo p&uacute;blico',
+                        'url' => route('store.public', $store->slug),
+                        'target' => '_blank',
+                        'variant' => 'outline',
+                    ])
+                </div>
+            </section>
+
+            <!-- 4. RECENT ORDERS TABLE -->
+            <section aria-labelledby="recent-orders-heading" class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 id="recent-orders-heading" class="text-lg font-semibold text-surface-900">Pedidos recientes</h2>
+                    <x-ui.button variant="ghost" size="sm" href="{{ route('orders.index') }}" icon="chevron-right" iconPosition="right">
+                        Ver todos
+                    </x-ui.button>
+                </div>
+                @if ($recentOrders->isNotEmpty())
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm" role="table">
+                            <thead>
+                                <tr class="border-b border-surface-200">
+                                    <th scope="col" class="text-left p-3 font-medium text-surface-500">Pedido</th>
+                                    <th scope="col" class="text-left p-3 font-medium text-surface-500">Cliente</th>
+                                    <th scope="col" class="text-left p-3 font-medium text-surface-500">Total</th>
+                                    <th scope="col" class="text-left p-3 font-medium text-surface-500">Estado</th>
+                                    <th scope="col" class="text-left p-3 font-medium text-surface-500">Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-surface-100">
+                                @foreach ($recentOrders as $order)
+                                    <tr class="hover:bg-surface-50 transition-colors">
+                                        <td class="p-3 font-mono text-surface-900">#{{ $order->id }}</td>
+                                        <td class="p-3 text-surface-700">{{ $order->customer_name }}</td>
+                                        <td class="p-3 font-semibold text-surface-900">{{ number_format($order->total, 2, ',', '.') }} {{ $store->currency }}</td>
+                                        <td class="p-3">
+                                            <x-ui.badge variant="{{ $this->getOrderStatusVariant($order->status) }}" size="sm">
+                                                {{ ucfirst($order->status) }}
+                                            </x-ui.badge>
+                                        </td>
+                                        <td class="p-3 text-surface-500">{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <x-ui.card variant="bordered" padding="lg" class="text-center py-8">
+                        <x-lucide-icon name="inbox" class="mx-auto h-12 w-12 text-surface-300" />
+                        <p class="mt-3 text-surface-500">No hay pedidos todav&iacute;a</p>
+                        <x-ui.button variant="primary" class="mt-4" href="{{ route('store.public', $store->slug) }}" target="_blank">
+                            Ver tu tienda
+                        </x-ui.button>
+                    </x-ui.card>
+                @endif
+            </section>
+<!-- 5. ALERTAS INTELIGENTES -->
+            @if ($unpublishedProductsCount > 0 || $lowStockProductsCount > 0)
+                <section aria-labelledby="alerts-heading" class="space-y-3">
+                    <h2 id="alerts-heading" class="text-lg font-semibold text-surface-900">Alertas</h2>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        @if ($unpublishedProductsCount > 0)
+                            <x-ui.card variant="bordered" class="border-semantic-warning-light bg-semantic-warning-light/50" padding="md">
+                                <div class="flex items-start gap-3">
+                                    <x-lucide-icon name="alert-triangle" class="mt-0.5 h-5 w-5 text-semantic-warning-dark flex-shrink-0" />
+                                    <div>
+                                        <p class="font-medium text-semantic-warning-dark">Productos sin publicar</p>
+                                        <p class="mt-1 text-sm text-semantic-warning-dark/80">{{ $unpublishedProductsCount }} producto{{ $unpublishedProductsCount > 1 ? 's' : '' }} no visible{{ $unpublishedProductsCount > 1 ? 's' : '' }} en tu cat&aacute;logo p&uacute;blico.</p>
+                                        <x-ui.button variant="outline" size="sm" class="mt-3" href="{{ route('products.index') }}">
+                                            Publicar ahora
+                                        </x-ui.button>
+                                    </div>
+                                </div>
+                            </x-ui.card>
+                        @endif
+                        @if ($lowStockProductsCount > 0)
+                            <x-ui.card variant="bordered" class="border-semantic-error-light bg-semantic-error-light/50" padding="md">
+                                <div class="flex items-start gap-3">
+                                    <x-lucide-icon name="package-minus" class="mt-0.5 h-5 w-5 text-semantic-error-dark flex-shrink-0" />
+                                    <div>
+                                        <p class="font-medium text-semantic-error-dark">Stock bajo</p>
+                                        <p class="mt-1 text-sm text-semantic-error-dark/80">{{ $lowStockProductsCount }} producto{{ $lowStockProductsCount > 1 ? 's' : '' }} con stock bajo.</p>
+                                        <x-ui.button variant="outline" size="sm" class="mt-3" href="{{ route('products.index') }}">
+                                            Revisar stock
+                                        </x-ui.button>
+                                    </div>
+                                </div>
+                            </x-ui.card>
+                        @endif
+                    </div>
+                </section>
+            @endif
+
+            <!-- MODALES -->
+            @include('dashboard.modals.product-create')
+            @include('dashboard.modals.share-store')
         </div>
     </div>
 </x-app-layout>

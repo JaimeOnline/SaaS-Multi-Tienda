@@ -9,6 +9,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderManagementController;
 use App\Http\Controllers\StoreSettingsController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -33,15 +34,9 @@ Route::patch('/carrito/productos/{product}', [CartController::class, 'update'])
 Route::delete('/carrito/productos/{product}', [CartController::class, 'remove'])
     ->name('cart.remove');
 
-Route::get('/dashboard', function () {
-    $store = request()->user()->store;
-    $subscription = $store->subscriptions()
-        ->with('plan')
-        ->latest()
-        ->first();
-
-    return view('dashboard', compact('store', 'subscription'));
-})->middleware(['auth', 'verified', 'active.subscription'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, '__invoke'])
+    ->middleware(['auth', 'verified', 'active.subscription'])
+    ->name('dashboard');
 
 Route::middleware(['auth', 'active.subscription'])->group(function () {
     Route::get('/store/settings', [StoreSettingsController::class, 'edit'])

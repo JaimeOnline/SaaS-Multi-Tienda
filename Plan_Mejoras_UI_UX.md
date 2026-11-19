@@ -282,6 +282,19 @@ git commit -m "a11y: implement focus trap in x-ui.modal component [a11y]"
 | A11y Baseline | 8 | 8 | ✅ |
 | Tests | 1 | 1 | ✅ |
 
+---
+
+## ✅ **ESTADO FASE 2: EN PROGRESO**
+
+| Fase | Entregable | Estado |
+|------|------------|--------|
+| **2.1** | Sidebar Navigation Responsive | ✅ Completada |
+| **2.2** | Dashboard Accionable | ✅ Completada |
+| **2.3** | DataTable Component | ⏳ Pendiente |
+| **2.4** | Form UX Moderno | ⏳ Pendiente |
+| **2.5** | Image Upload UX | ⏳ Pendiente |
+| **2.6** | Command Palette (Cmd+K) | ⏳ Pendiente |
+
 **Verificación Final:**
 - [x] `npm run build` compila sin errores (CSS ~56KB gz, JS ~19KB gz)
 - [x] `php artisan test` — **99/99 tests pasan** (298 assertions)
@@ -397,14 +410,58 @@ git commit -m "refactor(layouts): update app.blade.php for sidebar + main flex s
 - Gestionar categorías → `categories.index`
 - Ver catálogo público → `store.public` (new tab)
 
-**Commits:**
+**Commits realizados:**
 ```bash
+git commit -m "feat(models): add today(), thisMonth(), pending() scopes to Order [dashboard]"
+git commit -m "feat(models): add active(), unpublished() scopes to Product [dashboard]"
+git commit -m "feat(dashboard): add DashboardController with metrics computation [dashboard]"
 git commit -m "feat(dashboard): add metrics cards with 7d sparklines (SVG inline) [dashboard]"
 git commit -m "feat(dashboard): add quick actions grid with modal triggers [dashboard]"
 git commit -m "feat(dashboard): add subscription status banner (trial/grace/suspended/active) [dashboard]"
 git commit -m "feat(dashboard): add recent orders table (last 5) + link to full list [dashboard]"
 git commit -m "feat(dashboard): add low stock / unpublished products alerts [dashboard]"
+git commit -m "feat(dashboard): add product-create modal + share-store modal with QR [dashboard]"
+git commit -m "refactor(routes): use DashboardController for dashboard route [dashboard]"
+git commit -m "refactor(dashboard): extract partials (metric-card, quick-action, subscription-banner) [dashboard]"
+git commit -m "a11y(dashboard): ensure heading hierarchy, table semantics, focus management [dashboard]"
 ```
+
+**Criterios de aceptación:**
+- [x] Métricas correctas: Pedidos hoy / Ingresos mes / Productos activos coinciden con BD
+- [x] Sparklines renderizan: 4 SVGs inline con datos 7 días, responsive
+- [x] Quick actions funcionan: 6 botones (2 modales, 4 navegación, 1 new tab)
+- [x] Subscription banner: Estado correcto con colores semánticos + acción contextual
+- [x] Recent orders table: Últimos 5 pedidos + enlace "Ver todos"
+- [x] Alertas: Productos no publicados muestra alerta con botón acción
+- [x] Accesibilidad: Focus visible, heading hierarchy (h1→h2→h3), ARIA labels, tabla semántica
+- [x] Responsive: Grid 1 col (mobile) → 2 (tablet) → 4 (desktop); acciones 1→2→3 cols
+- [x] Design tokens: 0 hardcoded colors; usa `brand`, `semantic-*`, `surface-*`
+- [x] Tests: `php artisan test` pasa (99/99)
+
+---
+
+> ✅ **FASE 2.2 CONCLUIDA — Dashboard Accionable**
+> 
+> **Estado:** Completada y validada manualmente en navegador (Brave). Tests 99/99 pasando. Build OK.
+> 
+> **Archivos creados/modificados:**
+> - `app/Models/Order.php` — scopes `today()`, `thisMonth()`, `pending()`
+> - `app/Models/Product.php` — scopes `active()`, `unpublished()`
+> - `app/Http/Controllers/DashboardController.php` — **NUEVO** controlador dedicado
+> - `routes/web.php` — ruta `/dashboard` usa `DashboardController@__invoke`
+> - `resources/views/dashboard.blade.php` — **REESCRITURA COMPLETA** (5 secciones)
+> - `resources/views/dashboard/partials/metric-card.blade.php` — **NUEVO** partial métricas + sparkline
+> - `resources/views/dashboard/partials/quick-action.blade.php` — **NUEVO** partial acciones rápidas
+> - `resources/views/dashboard/partials/subscription-banner.blade.php` — **NUEVO** banner suscripción 5 estados
+> - `resources/views/dashboard/modals/product-create.blade.php` — **NUEVO** modal crear producto
+> - `resources/views/dashboard/modals/share-store.blade.php` — **NUEVO** modal compartir con QR/WhatsApp
+> 
+> **Issues resueltos:**
+> 1. **ParseError metric-card** — Corregido `:disabled="{{ $actionDisabled ? 'true' : 'false' }}"` → `:disabled="$actionDisabled"`
+> 
+> **Próxima IA:** Continuar con **Fase 2.3 — DataTable Component** (ver sección abajo).
+> 
+> ---
 
 ---
 
