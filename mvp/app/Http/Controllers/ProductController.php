@@ -25,20 +25,66 @@ class ProductController extends Controller
     {
         $store = $request->user()->store;
 
-        $products = $store->products()
-            ->with('category')
-            ->when($request->filled('search'), function ($query) use ($request) {
-                $query->where('name', 'ilike', '%' . $request->string('search') . '%');
-            })
-            ->when($request->filled('category_id'), function ($query) use ($request) {
-                $query->where('category_id', $request->integer('category_id'));
-            })
-            ->orderBy('name')
-            ->get();
+        $query = $store->products()->with('category');
 
-        $categories = $store->categories()
-            ->orderBy('name')
-            ->get();
+        // Global search
+        $query->when($request->filled('search'), function ($q) use ($request) {
+            $q->where('name', 'ilike', '%' . $request->string('search') . '%');
+        });
+
+        // Column filters
+        $query->when($request->filled('filter_category_id'), function ($q) use ($request) {
+            $q->where('category_id', $request->integer('filter_category_id'));
+        });
+        $query->when($request->filled('filter_is_available'), function ($q) use ($request) {
+            $q->where('is_available', $request->boolean('filter_is_available'));
+        });
+
+        // Sorting
+        $sortBy = $request->string('sort_by')->toString();
+        $sortDir = in_array($request->string('sort_dir')->toString(), ['asc', 'desc']) ? $request->string('sort_dir')->toString() : 'asc';
+        $allowedSorts = ['name', 'price', 'created_at', 'is_available'];
+        if (in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $sortDir);
+        } else {
+            $query->orderBy('name');
+        }
+
+        $products = $query->paginate(25)->withQueryString();
+
+        $categories = $store->categories()->orderBy('name')->get();
+
+        // Handle AJAX request for datatable
+        if ($request->expectsJson()) {
+            $data = $products->getCollection()->map(function ($product) use ($store) {
+                return [
+                    'id' => $product->id,
+                    'image_path' => $product->image_path,
+                    'name' => $product->name,
+                    'category' => $product->category?->only(['id', 'name']),
+                    'price' => $product->price,
+                    'is_available' => $product->is_available,
+                    'actions' => [
+                        [
+                            'label' => 'Editar',
+                            'icon' => 'edit-2',
+                            'variant' => 'ghost',
+                            'onclick' => "editProduct({$product->id})",
+                        ],
+                        [
+                            'label' => 'Eliminar',
+                            'icon' => 'trash-2',
+                            'variant' => 'danger',
+                            'onclick' => "deleteProduct({$product->id})",
+                        ],
+                    ],
+                ];
+            });
+
+            return response()->json(array_merge($products->toArray(), [
+                'data' => $data,
+            ]));
+        }
 
         return view('products.index', compact('products', 'categories'));
     }
@@ -254,5 +300,41 @@ class ProductController extends Controller
             ->whereKey($categoryId)
             ->where('store_id', $storeId)
             ->exists();
+    }
+
+    /**
+     * Bulk delete products.
+     */
+    public function bulkDestroy(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate(['ids' => ['required', 'array'], 'ids.*' => ['integer', 'exists:products,id']]);
+
+        $store = $request->user()->store;
+        $deletedCount = $store->products()->whereIn('id', $request->ids)->delete();
+
+        return response()->json([
+            'message' => "Se eliminaron {$deletedCount} producto" . ($deletedCount !== 1 ? 's' : '') . ' correctamente.',
+        ]);
+    }
+
+    /**
+     * Bulk toggle product availability.
+     */
+    public function bulkToggleAvailability(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate(['ids' => ['required', 'array'], 'ids.*' => ['integer', 'exists:products,id']]);
+
+        $store = $request->user()->store;
+        $products = $store->products()->whereIn('id', $request->ids)->get();
+
+        $updatedCount = 0;
+        foreach ($products as $product) {
+            $product->update(['is_available' => !$product->is_available]);
+            $updatedCount++;
+        }
+
+        return response()->json([
+            'message' => "Se actualizó la disponibilidad de {$updatedCount} producto" . ($updatedCount !== 1 ? 's' : '') . '.',
+        ]);
     }
 }

@@ -8,10 +8,11 @@
                 </h2>
             </div>
 
-            <a href="{{ route('dashboard') }}"
-                class="inline-flex w-fit items-center rounded-xl bg-surface-100 px-3 py-2 text-sm font-semibold text-surface-700 transition hover:bg-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
-                Volver al dashboard
-            </a>
+            <x-ui.button variant="primary" size="sm"
+                x-on:click="$dispatch('open-modal', { detail: 'category-create' })">
+                <x-lucide-icon name="plus" class="w-4 h-4" />
+                Nueva categoría
+            </x-ui.button>
         </div>
     </x-slot>
 
@@ -27,76 +28,42 @@
                 </div>
             @endif
 
-            <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                <h3 class="text-lg font-semibold text-gray-900">
-                    Nueva categoría
-                </h3>
-
-                <form method="POST" action="{{ route('categories.store') }}"
-                    class="mt-4 flex flex-col gap-3 sm:flex-row">
-                    @csrf
-
-                    <input type="text" name="name" value="{{ old('name') }}" placeholder="Ej. Postres" required
-                        class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-
-                    <button type="submit"
-                        class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
-                        Crear
-                    </button>
-                </form>
-            </div>
-
-            <div class="bg-white shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900">
-                        Mis categorías
-                    </h3>
-
-                    @forelse ($categories as $category)
-                        <div
-                            class="mt-4 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <p class="font-medium text-gray-900">
-                                    {{ $category->name }}
-                                </p>
-                                <p class="text-sm text-gray-500">
-                                    {{ $category->slug }}
-                                </p>
-                            </div>
-
-                            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-                                <form method="POST" action="{{ route('categories.update', $category) }}"
-                                    class="flex flex-col gap-2 sm:flex-row">
-                                    @csrf
-                                    @method('PATCH')
-
-                                    <input type="text" name="name" value="{{ $category->name }}" required
-                                        class="rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-
-                                    <button type="submit"
-                                        class="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                        Guardar
-                                    </button>
-                                </form>
-
-                                <form method="POST" action="{{ route('categories.destroy', $category) }}">
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button type="submit"
-                                        class="rounded-lg px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                                        Eliminar
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    @empty
-                        <p class="mt-4 text-sm text-gray-600">
-                            Todavía no tienes categorías creadas.
-                        </p>
-                    @endforelse
-                </div>
-            </div>
+            <x-ui.datatable name="categories-table" :columns="[
+                ['key' => 'name', 'label' => 'Nombre', 'sortable' => true, 'searchable' => true, 'mobilePriority' => 1],
+                ['key' => 'slug', 'label' => 'Slug', 'sortable' => true, 'searchable' => false, 'mobilePriority' => 2],
+                [
+                    'key' => 'products_count',
+                    'label' => 'Productos',
+                    'sortable' => true,
+                    'searchable' => false,
+                    'align' => 'center',
+                    'mobilePriority' => 3,
+                ],
+                [
+                    'key' => 'actions',
+                    'label' => 'Acciones',
+                    'sortable' => false,
+                    'searchable' => false,
+                    'width' => '120px',
+                    'align' => 'center',
+                    'mobilePriority' => 1,
+                ],
+            ]" :data="$categories->toArray()" :pagination="$categories->toArray()"
+                :sortable="true" :filterable="true" :selectable="true" :bulk-actions="['delete']"
+                empty-state="Todavía no tienes categorías. Crea tu primera." empty-action="Crear categoría"
+                empty-action-url="{{ route('categories.index') }}" />
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('alpine:init', () => {
+                Alpine.store('categoriesTable', {
+                    bulkDeleteUrl: '{{ route('categories.bulk-delete') }}',
+                });
+            });
+        </script>
+    @endpush
+
+    @include('categories.modals.create')
 </x-app-layout>

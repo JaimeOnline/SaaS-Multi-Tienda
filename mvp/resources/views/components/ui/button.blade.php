@@ -1,5 +1,5 @@
 @props([
-    'variant' => 'primary', // primary, secondary, ghost, danger, outline
+    'variant' => 'primary', // primary, secondary, ghost, danger, outline, success
     'size' => 'md',         // sm, md, lg
     'loading' => false,
     'disabled' => false,
@@ -18,6 +18,7 @@
         'ghost' => 'bg-transparent text-surface-700 hover:bg-surface-100 active:bg-surface-200 focus:ring-surface-400',
         'danger' => 'bg-semantic-error text-white hover:bg-semantic-error-dark active:bg-semantic-error-dark focus:ring-semantic-error',
         'outline' => 'border-2 border-surface-300 text-surface-700 hover:bg-surface-50 active:bg-surface-100 focus:ring-surface-400',
+        'success' => 'bg-semantic-success text-white hover:bg-semantic-success-dark active:bg-semantic-success-dark focus:ring-semantic-success',
     ];
     
     $sizeClasses = [

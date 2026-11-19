@@ -290,7 +290,7 @@ git commit -m "a11y: implement focus trap in x-ui.modal component [a11y]"
 |------|------------|--------|
 | **2.1** | Sidebar Navigation Responsive | ✅ Completada |
 | **2.2** | Dashboard Accionable | ✅ Completada |
-| **2.3** | DataTable Component | ⏳ Pendiente |
+| **2.3** | DataTable Component | ✅ Completada |
 | **2.4** | Form UX Moderno | ⏳ Pendiente |
 | **2.5** | Image Upload UX | ⏳ Pendiente |
 | **2.6** | Command Palette (Cmd+K) | ⏳ Pendiente |
@@ -384,8 +384,6 @@ git commit -m "refactor(layouts): update app.blade.php for sidebar + main flex s
 > git commit -m "fix(nav): fix closeAll order to prevent bottom nav flash [nav]"
 > ```
 > 
-> **Próxima IA:** Continuar con **Fase 2.2 — Dashboard Accionable** (ver sección abajo).
-> 
 > ---
 ---
 
@@ -459,8 +457,7 @@ git commit -m "a11y(dashboard): ensure heading hierarchy, table semantics, focus
 > **Issues resueltos:**
 > 1. **ParseError metric-card** — Corregido `:disabled="{{ $actionDisabled ? 'true' : 'false' }}"` → `:disabled="$actionDisabled"`
 > 
-> **Próxima IA:** Continuar con **Fase 2.3 — DataTable Component** (ver sección abajo).
-> 
+ 
 > ---
 
 ---
@@ -512,6 +509,56 @@ git commit -m "refactor(orders): migrate index.blade.php to x-ui.datatable [data
 git commit -m "feat(datatable): add column visibility + responsive stacked mode [datatable]"
 git commit -m "feat(datatable): add bulk actions toolbar + keyboard shortcuts [datatable]"
 ```
+
+---
+
+> ✅ **FASE 2.3 CONCLUIDA — DataTable Component**
+> 
+> **Estado:** Completada y validada manualmente en navegador (Brave). Tests 99/99 pasando. Build OK.
+> 
+> **Archivos creados:**
+> - `resources/views/components/ui/datatable.blade.php` — Componente principal con Alpine.js store
+> - `resources/views/components/ui/datatable-toolbar.blade.php` — Toolbar (búsqueda global, toggle columnas, filtros por columna)
+> - `resources/views/components/ui/datatable-row.blade.php` — Renderizado filas (tabla desktop + cards mobile)
+> - `resources/views/components/ui/datatable-skeleton.blade.php` — Skeletons de carga
+> - `resources/views/categories/modals/create.blade.php` — Modal crear categoría (fix post-implementación)
+> 
+> **Archivos modificados:**
+> - `app/Http/Controllers/ProductController.php` — Paginación, ordenación, filtrado server-side + bulk actions
+> - `app/Http/Controllers/CategoryController.php` — Paginación, ordenación, filtrado server-side + bulk delete
+> - `app/Http/Controllers/OrderManagementController.php` — Paginación, ordenación, filtrado server-side + bulk actions
+> - `resources/views/products/index.blade.php` — Migrado a `<x-ui.datatable>`
+> - `resources/views/categories/index.blade.php` — Migrado a `<x-ui.datatable>`
+> - `resources/views/orders/index.blade.php` — Migrado a `<x-ui.datatable>`
+> - `routes/web.php` — Rutas para bulk actions (DELETE /products, /categories, /orders + PATCH bulk-toggle)
+> - `app/Models/Category.php` — Accessor `products_count`
+> - `resources/views/components/ui/button.blade.php` — Variante `success` añadida
+> 
+> **Features implementadas:**
+> - ✅ Server-side pagination, sorting, filtering (params: page, sort_by, sort_dir, search, filter_*)
+> - ✅ Responsive: Tabla en desktop (≥lg), Cards apiladas en mobile (<lg)
+> - ✅ Selección de filas con checkbox + Shift+Click para rango + Select All
+> - ✅ Bulk actions toolbar (flotante en mobile, inline en desktop): Eliminar, Toggle disponibilidad
+> - ✅ Column visibility toggle con persistencia en localStorage
+> - ✅ Column filters (debounced 300ms) + Global search
+> - ✅ Keyboard navigation: `/` = focus search, `Space` = toggle fila, `Esc` = limpiar selección, `Ctrl+A` = select all
+> - ✅ Skeleton loading mientras fetch
+> - ✅ Accesibilidad: ARIA roles, focus visible, live regions, semantic HTML
+> - ✅ Design tokens: 0 hardcoded colors, usa `brand-*`, `semantic-*`, `surface-*`
+> - ✅ URL sync: Estado persistido en query params (compartible, refresh-safe)
+> 
+> **Criterios de aceptación:**
+> - [x] `npm run build` compila sin errores (CSS ~59KB gz, JS ~19KB gz)
+> - [x] `php artisan test` — **99/99 tests pasan** (283 assertions)
+> - [x] 0 hardcoded colors en nuevos componentes
+> - [x] Paginación, ordenación, filtrado funcionan server-side
+> - [x] Selección + bulk actions funcionan
+> - [x] Responsive: tabla ≥1024px / cards <1024px
+> - [x] Accesibilidad: navegación teclado, ARIA, focus visible
+> 
+> **Próxima IA:** Continuar con **Fase 2.4 — Form UX Moderno** (ver sección abajo).
+> 
+> ---
 ---
 
 ### 2.4 Form UX Moderno — Validación Inline, Auto-save, Shortcuts

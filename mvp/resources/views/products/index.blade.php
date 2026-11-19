@@ -8,10 +8,11 @@
                 </h2>
             </div>
 
-            <a href="{{ route('dashboard') }}"
-                class="inline-flex w-fit items-center rounded-xl bg-surface-100 px-3 py-2 text-sm font-semibold text-surface-700 transition hover:bg-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
-                Volver al dashboard
-            </a>
+            <x-ui.button variant="primary" size="sm"
+                x-on:click="$dispatch('open-modal', { detail: 'product-create' })">
+                <x-lucide-icon name="plus" class="w-4 h-4" />
+                Nuevo producto
+            </x-ui.button>
         </div>
     </x-slot>
 
@@ -27,165 +28,66 @@
                 </div>
             @endif
 
-            <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                <h3 class="text-lg font-semibold text-gray-900">
-                    Nuevo producto
-                </h3>
-
-                <form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data"
-                    class="mt-4 grid gap-4 md:grid-cols-2">
-                    @csrf
-
-                    <input name="name" value="{{ old('name') }}" required placeholder="Nombre del producto"
-                        class="rounded-md border-gray-300 shadow-sm">
-
-                    <input name="price" value="{{ old('price') }}" type="number" min="0" step="0.01"
-                        required placeholder="Precio" class="rounded-md border-gray-300 shadow-sm">
-
-                    <select name="category_id" class="rounded-md border-gray-300 shadow-sm">
-                        <option value="">Sin categoría</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    <textarea name="description" placeholder="Descripción" class="rounded-md border-gray-300 shadow-sm">{{ old('description') }}</textarea>
-
-                    <label class="text-sm text-gray-700">
-                        Imagen principal del producto
-                        <input type="file" name="image_path" accept="image/jpeg,image/png,image/webp"
-                            class="mt-1 block w-full text-sm">
-                    </label>
-
-                    <label class="text-sm text-gray-700">
-                        Imágenes adicionales
-                        <input type="file" name="images[]" multiple accept="image/jpeg,image/png,image/webp"
-                            class="mt-1 block w-full text-sm">
-                        <span class="mt-1 block text-xs text-gray-500">
-                            Puedes seleccionar hasta 5 imágenes adicionales.
-                        </span>
-                    </label>
-
-                    <label class="flex items-center gap-2 text-sm text-gray-700">
-                        <input type="hidden" name="is_available" value="0">
-                        <input type="checkbox" name="is_available" value="1" checked>
-                        Disponible
-                    </label>
-
-                    <button type="submit"
-                        class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
-                        Crear producto
-                    </button>
-                </form>
-            </div>
-
-            <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                <form method="GET" action="{{ route('products.index') }}" class="grid gap-3 md:grid-cols-3">
-                    <input name="search" value="{{ request('search') }}" placeholder="Buscar por nombre"
-                        class="rounded-md border-gray-300 shadow-sm">
-
-                    <select name="category_id" class="rounded-md border-gray-300 shadow-sm">
-                        <option value="">Todas las categorías</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}" @selected(request('category_id') == $category->id)>
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    <button type="submit"
-                        class="rounded-md bg-gray-800 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-900">
-                        Filtrar
-                    </button>
-                </form>
-            </div>
-
-            <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                <h3 class="text-lg font-semibold text-gray-900">
-                    Mis productos
-                </h3>
-
-                <div class="mt-4 space-y-4">
-                    @forelse ($products as $product)
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
-                            @if ($product->image_path)
-                                <img src="{{ Storage::disk('public')->url($product->image_path) }}"
-                                    alt="{{ $product->name }}"
-                                    class="mb-3 h-28 w-28 rounded-xl border border-slate-200 object-cover shadow-sm">
-                            @endif
-
-                            <form method="POST" action="{{ route('products.update', $product) }}"
-                                enctype="multipart/form-data"
-                                class="grid gap-4 rounded-xl bg-white p-4 shadow-sm md:grid-cols-6 md:items-center">
-                                @csrf
-                                @method('PATCH')
-
-                                <input name="name" value="{{ $product->name }}" required
-                                    class="rounded-md border-gray-300 shadow-sm">
-
-                                <input name="price" value="{{ $product->price }}" type="number" min="0"
-                                    step="0.01" required class="rounded-md border-gray-300 shadow-sm">
-
-                                <select name="category_id" class="rounded-md border-gray-300 shadow-sm">
-                                    <option value="">Sin categoría</option>
-                                    @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}" @selected($product->category_id == $category->id)>
-                                            {{ $category->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-
-                                <input name="description" value="{{ $product->description }}" placeholder="Descripción"
-                                    class="rounded-md border-gray-300 shadow-sm">
-
-                                <label class="min-w-0 text-sm text-gray-700 md:col-span-2">
-                                    Imagen principal
-                                    <input type="file" name="image_path" accept="image/jpeg,image/png,image/webp"
-                                        class="mt-1 block w-full min-w-0 text-sm">
-                                </label>
-
-                                <label class="text-sm text-gray-700 min-w-0 md:col-span-2">
-                                    Imágenes adicionales
-                                    <input type="file" name="images[]" multiple
-                                        accept="image/jpeg,image/png,image/webp"
-                                        class="mt-1 block w-full min-w-0 text-sm">
-                                    <span class="mt-1 block text-xs text-gray-500">
-                                        Puedes seleccionar hasta 5 imágenes adicionales.
-                                    </span>
-                                </label>
-
-                                <label class="flex items-center gap-2 text-sm text-gray-700">
-                                    <input type="hidden" name="is_available" value="0">
-                                    <input type="checkbox" name="is_available" value="1"
-                                        @checked($product->is_available)>
-                                    Disponible
-                                </label>
-
-                                <button type="submit"
-                                    class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
-                                    Guardar
-                                </button>
-                            </form>
-
-                            <form method="POST" action="{{ route('products.destroy', $product) }}" class="mt-3">
-                                @csrf
-                                @method('DELETE')
-
-                                <button type="submit"
-                                    class="rounded-lg px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                                    Eliminar
-                                </button>
-                            </form>
-                        </div>
-                    @empty
-                        <p class="text-sm text-gray-600">
-                            Todavía no tienes productos creados.
-                        </p>
-                    @endforelse
-                </div>
-            </div>
+            <x-ui.datatable name="products-table" :columns="[
+                [
+                    'key' => 'image_path',
+                    'label' => 'Imagen',
+                    'sortable' => false,
+                    'searchable' => false,
+                    'width' => '60px',
+                    'align' => 'center',
+                    'mobilePriority' => 1,
+                ],
+                ['key' => 'name', 'label' => 'Nombre', 'sortable' => true, 'searchable' => true, 'mobilePriority' => 1],
+                [
+                    'key' => 'category.name',
+                    'label' => 'Categoría',
+                    'sortable' => true,
+                    'searchable' => true,
+                    'mobilePriority' => 2,
+                ],
+                [
+                    'key' => 'price',
+                    'label' => 'Precio',
+                    'sortable' => true,
+                    'format' => 'currency',
+                    'align' => 'right',
+                    'mobilePriority' => 2,
+                ],
+                [
+                    'key' => 'is_available',
+                    'label' => 'Estado',
+                    'sortable' => true,
+                    'format' => 'badge',
+                    'align' => 'center',
+                    'mobilePriority' => 3,
+                ],
+                [
+                    'key' => 'actions',
+                    'label' => 'Acciones',
+                    'sortable' => false,
+                    'searchable' => false,
+                    'width' => '140px',
+                    'align' => 'center',
+                    'mobilePriority' => 1,
+                ],
+            ]" :data="$products->toArray()" :pagination="$products->toArray()"
+                :sortable="true" :filterable="true" :selectable="true" :bulk-actions="['delete', 'toggle_availability']"
+                empty-state="Todavía no tienes productos. Crea tu primero." empty-action="Crear producto"
+                empty-action-url="{{ route('products.index') }}" />
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('alpine:init', () => {
+                Alpine.store('productsTable', {
+                    bulkDeleteUrl: '{{ route('products.bulk-delete') }}',
+                    bulkToggleUrl: '{{ route('products.bulk-toggle-availability') }}',
+                });
+            });
+        </script>
+    @endpush
+
+    @include('dashboard.modals.product-create')
 </x-app-layout>

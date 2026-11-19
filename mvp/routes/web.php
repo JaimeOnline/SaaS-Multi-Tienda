@@ -63,11 +63,20 @@ Route::middleware(['auth', 'active.subscription'])->group(function () {
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])
         ->name('categories.destroy');
 
+    Route::delete('/categories', [CategoryController::class, 'bulkDestroy'])
+        ->name('categories.bulk-delete');
+
     Route::get('/orders', [OrderManagementController::class, 'index'])
         ->name('orders.index');
 
     Route::patch('/orders/{order}', [OrderManagementController::class, 'update'])
         ->name('orders.update');
+
+    Route::delete('/orders', [OrderManagementController::class, 'bulkDestroy'])
+        ->name('orders.bulk-delete');
+
+    Route::patch('/orders/bulk-toggle-status', [OrderManagementController::class, 'bulkToggleStatus'])
+        ->name('orders.bulk-toggle-status');
 
     Route::get('/products', [ProductController::class, 'index'])
         ->name('products.index');
@@ -80,6 +89,12 @@ Route::middleware(['auth', 'active.subscription'])->group(function () {
 
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])
         ->name('products.destroy');
+
+    Route::delete('/products', [ProductController::class, 'bulkDestroy'])
+        ->name('products.bulk-delete');
+
+    Route::patch('/products/bulk-toggle-availability', [ProductController::class, 'bulkToggleAvailability'])
+        ->name('products.bulk-toggle-availability');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
