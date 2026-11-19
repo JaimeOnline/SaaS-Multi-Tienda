@@ -2,7 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+[x-cloak] {
+    display: none !important;
+}
+
 @layer base {
+
+    /*
+     * Mantiene reservado el espacio de la barra de desplazamiento.
+     * Evita que la pantalla se mueva horizontalmente al abrir/cerrar
+     * drawers que aplican overflow-y-hidden al body.
+     */
+    html {
+        scrollbar-gutter: stable;
+    }
+
+    /*
+     * Evita desplazamientos horizontales producidos por transiciones
+     * del sidebar o por elementos fixed que exceden el viewport.
+     */
+    body {
+        overflow-x: hidden;
+    }
+
     /* Focus visible outlines using design tokens */
     *:focus-visible {
         @apply outline-none ring-2 ring-brand-500/50 ring-offset-2 ring-offset-white;
@@ -15,6 +37,7 @@
 
     /* Reduced motion support */
     @media (prefers-reduced-motion: reduce) {
+
         *,
         *::before,
         *::after {
@@ -30,6 +53,7 @@
         :root {
             --ring-color: #000;
         }
+
         *:focus-visible {
             @apply ring-2 ring-current ring-offset-2 ring-offset-white;
         }
@@ -37,6 +61,7 @@
 }
 
 @layer components {
+
     /* Form focus states */
     .form-input:focus,
     .form-select:focus,

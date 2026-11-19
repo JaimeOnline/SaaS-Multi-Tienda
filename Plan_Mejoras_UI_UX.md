@@ -348,6 +348,32 @@ git commit -m "feat(nav): add Alpine store for sidebar state (persisted in local
 git commit -m "a11y(nav): add keyboard navigation (arrows, enter, esc) + focus management [nav]"
 git commit -m "refactor(layouts): update app.blade.php for sidebar + main flex structure [nav]"
 ```
+
+---
+
+> ✅ **FASE 2.1 CONCLUIDA — Sidebar Navigation Responsive**
+> 
+> **Estado:** Todos los issues resueltos. Tests 99/99 pasando. Build OK.
+> 
+> **Issues resueltos en esta fase:**
+> 1. **Desktop tooltip flash** — Removido `group-hover:opacity-100` de tooltips en sidebar colapsado
+> 2. **Mobile/Tablet backdrop flash** — Eliminadas transiciones de salida (`x-transition:leave=""`) en ambos backdrops
+> 3. **Navegación nativa rota** — Restaurados `<a href="{{ route(...) }}">` nativos + listener global `click` en `sidebar.js`
+> 4. **Desktop layout shift** — Removido `transition-all` del main wrapper en `app.blade.php` (línea 30)
+> 5. **Mobile "Más" drawer flash** — Corregido orden en `closeAll()`: primero `closeBottomNav()`, luego `closeMobile()`
+> 
+> **Commits aplicados:**
+> ```bash
+> git commit -m "fix(nav): remove group-hover tooltip flash on collapsed sidebar [nav]"
+> git commit -m "fix(nav): remove backdrop leave transition entirely for instant hide [nav]"
+> git commit -m "fix(nav): add global click listener for mobile drawer close + restore native links [nav]"
+> git commit -m "fix(nav): remove main wrapper transition to prevent layout shift [nav]"
+> git commit -m "fix(nav): fix closeAll order to prevent bottom nav flash [nav]"
+> ```
+> 
+> **Próxima IA:** Continuar con **Fase 2.2 — Dashboard Accionable** (ver sección abajo).
+> 
+> ---
 ---
 
 ### 2.2 Dashboard Accionable
